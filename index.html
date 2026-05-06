@@ -1584,9 +1584,370 @@
     .planes-meta { grid-template-columns: 1fr 1fr; }
     .proposal-planes-grid { grid-template-columns: 1fr; }
   }
+
+  /* ============ LOGIN ============ */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--navy);
+    background:
+      radial-gradient(ellipse 800px 600px at 20% 10%, rgba(53,97,212,0.14), transparent 60%),
+      var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px 36px;
+  }
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .login-logo-text .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .login-logo-text .sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 3px;
+  }
+  .login-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .login-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .login-field { margin-bottom: 14px; }
+  .login-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+  }
+  .login-field input {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .login-field input:focus { outline: none; border-color: var(--blue); }
+  .login-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 13px;
+    background: var(--blue);
+    color: white;
+    border: 0;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .login-btn:hover { background: var(--blue-soft); }
+  .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .login-error {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--red);
+    min-height: 16px;
+    text-align: center;
+  }
+
+  /* ============ USER BAR ============ */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-email {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .btn-save {
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    background: var(--blue);
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-save:hover { background: var(--blue-soft); }
+  .btn-signout {
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-signout:hover { color: var(--text); border-color: var(--line-strong); }
+
+  /* ============ SAVE MODAL ============ */
+  #save-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(0,0,0,0.55);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #save-modal.open { display: flex; }
+  .save-modal-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 32px;
+  }
+  .save-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .save-modal-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .save-modal-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+  }
+  .save-modal-field input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .save-modal-field input:focus { outline: none; border-color: var(--blue); }
+  .save-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* ============ HISTORIAL ============ */
+  .historial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .historial-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 22px;
+    transition: border-color 0.2s;
+  }
+  .historial-item:hover { border-color: var(--line-strong); }
+  .historial-info { flex: 1; min-width: 0; }
+  .historial-nombre {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .historial-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .historial-kpis {
+    display: flex;
+    gap: 28px;
+    flex-shrink: 0;
+  }
+  .historial-kpi { text-align: right; }
+  .historial-kpi-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .historial-kpi-value {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--green);
+  }
+  .historial-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .historial-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .historial-refresh {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 640px) {
+    .header-inner {
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      gap: 10px;
+    }
+    .tabs {
+      order: 3;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      border-radius: 10px;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      padding: 8px 14px;
+      font-size: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .user-bar { order: 2; margin-left: auto; }
+    .user-email { display: none; }
+    main { padding: 24px 16px 60px; }
+    h1 { font-size: 22px; }
+    .subtitle { font-size: 13px; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .be-scenarios-grid { grid-template-columns: 1fr 1fr; }
+    .be-result-grid { grid-template-columns: 1fr; }
+    .planes-meta { grid-template-columns: 1fr 1fr; }
+    .montecarlo-percentiles { grid-template-columns: 1fr 1fr; }
+    .montecarlo-header { flex-direction: column; }
+    .control { flex-wrap: wrap; gap: 8px; }
+    .control label { flex: 0 0 100%; font-size: 12px; }
+    .control .out { min-width: 60px; }
+    .historial-kpis { display: none; }
+    .historial-actions { flex-direction: column; }
+    .login-card { padding: 28px 20px; }
+    .save-modal-card { padding: 24px 20px; }
+  }
+  @media (max-width: 420px) {
+    h1 { font-size: 19px; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .tier-comparison { grid-template-columns: 1fr 1fr; }
+    .planes-meta { grid-template-columns: 1fr; }
+  }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="7" fill="#3561D4"/>
+        <path d="M9 9 L16 16 L9 23 M23 9 L16 16 L23 23" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <div class="login-logo-text">
+        <div class="brand">Gruvex</div>
+        <div class="sub">Internal Tool</div>
+      </div>
+    </div>
+    <div class="login-title">Bienvenido</div>
+    <div class="login-subtitle">Ingresá con tu cuenta Gruvex para continuar.</div>
+    <form id="login-form" onsubmit="return false;">
+      <div class="login-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@gruvex.com" autocomplete="email" required>
+      </div>
+      <div class="login-field">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button class="login-btn" id="login-btn" type="submit">Ingresar</button>
+      <div class="login-error" id="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SAVE MODAL ============ -->
+<div id="save-modal">
+  <div class="save-modal-card">
+    <div class="save-modal-title">Guardar cotización</div>
+    <div class="save-modal-sub">Se guardará el estado actual del cotizador para todos los usuarios.</div>
+    <div class="save-modal-field">
+      <label>Nombre</label>
+      <input type="text" id="save-nombre" placeholder="Ej: Flota XYZ · 200 vehículos · Mayo 2026" maxlength="100">
+    </div>
+    <div class="save-modal-actions">
+      <button class="btn primary" id="save-confirm-btn" onclick="guardarCotizacion()">Guardar</button>
+      <button class="btn" onclick="closeSaveModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="header-inner">
@@ -1608,8 +1969,14 @@
       <button class="tab" data-view="propuesta">Propuesta a prestador</button>
       <button class="tab" data-view="planes">Planes cliente final</button>
       <button class="tab" data-view="breakeven">Break-even</button>
+      <button class="tab" data-view="historial">Historial</button>
     </div>
 
+    <div class="user-bar" id="user-info" style="display:none;">
+      <span class="user-email" id="user-email-display"></span>
+      <button class="btn-save" onclick="openSaveModal()">Guardar</button>
+      <button class="btn-signout" onclick="signOut()">Salir</button>
+    </div>
     <div class="header-meta" id="dateNow">—</div>
   </div>
 </header>
@@ -2387,6 +2754,20 @@
   </div>
 </div>
 
+<!-- ============ HISTORIAL ============ -->
+<div class="view" id="view-historial">
+  <div class="page-title">Historial compartido</div>
+  <h1>Cotizaciones <em>guardadas</em></h1>
+  <p class="subtitle">Todas las cotizaciones guardadas por el equipo. Cargá cualquiera para restaurar ese estado en el cotizador.</p>
+
+  <div class="historial-refresh">
+    <button class="btn" onclick="cargarHistorial()">↺ Actualizar</button>
+  </div>
+  <div class="historial-list" id="historial-list">
+    <div class="historial-empty">Cargando...</div>
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -2667,8 +3048,8 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
     document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === 'view-' + v));
     window.scrollTo(0, 0);
-    // Si entramos a break-even, refrescar cálculo (depende de los planes)
     if (v === 'breakeven') calcBreakeven();
+    if (v === 'historial') cargarHistorial();
   }
 
   // Sync cotizador → propuesta
@@ -3517,6 +3898,199 @@
   calc();
   syncProposal();
 })();
+
+// ============ SUPABASE ============
+// Reemplazá estos valores con los de tu proyecto en supabase.com → Settings → API
+const SUPABASE_URL = 'https://TUPROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU_CLAVE_ANON_DE_SUPABASE';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) onLogin(session.user);
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) onLogin(session.user);
+    else onLogout();
+  });
+}
+
+function onLogin(user) {
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('user-info').style.display = 'flex';
+  document.getElementById('dateNow').style.display = 'block';
+  document.getElementById('user-email-display').textContent = user.email;
+}
+
+function onLogout() {
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('user-info').style.display = 'none';
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+}
+
+// Login form
+document.getElementById('login-form').addEventListener('submit', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Ingresando...';
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    errEl.textContent = error.message === 'Invalid login credentials'
+      ? 'Email o contraseña incorrectos.'
+      : error.message;
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+});
+
+// Save modal
+function openSaveModal() {
+  document.getElementById('save-modal').classList.add('open');
+  setTimeout(() => document.getElementById('save-nombre').focus(), 50);
+}
+function closeSaveModal() {
+  document.getElementById('save-modal').classList.remove('open');
+}
+
+async function guardarCotizacion() {
+  if (!currentUser) return;
+  const nombre = document.getElementById('save-nombre').value.trim() || 'Sin nombre';
+  const datos = capturarEstado();
+  const btn = document.getElementById('save-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const { error } = await sb.from('cotizaciones').insert({
+    user_id: currentUser.id,
+    user_email: currentUser.email,
+    nombre,
+    datos
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Guardar';
+
+  if (error) {
+    alert('Error al guardar: ' + error.message);
+  } else {
+    closeSaveModal();
+    document.getElementById('save-nombre').value = '';
+    if (document.querySelector('#view-historial.active')) cargarHistorial();
+  }
+}
+
+function capturarEstado() {
+  const estado = {};
+  document.querySelectorAll('#view-cotizador input[type=range], #view-cotizador input[type=number]').forEach(el => {
+    if (el.id) estado[el.id] = el.value;
+  });
+  const modeBtn = document.querySelector('.mode-btn.active');
+  if (modeBtn) estado['_mode'] = modeBtn.dataset.mode;
+  const marginMonth = document.getElementById('margin-month');
+  if (marginMonth) estado['_margin_month'] = marginMonth.textContent;
+  const revMonth = document.getElementById('rev-month');
+  if (revMonth) estado['_rev_month'] = revMonth.textContent;
+  const costMonth = document.getElementById('cost-month');
+  if (costMonth) estado['_cost_month'] = costMonth.textContent;
+  return estado;
+}
+
+function restaurarEstado(datos) {
+  Object.keys(datos).forEach(id => {
+    if (id.startsWith('_')) return;
+    const el = document.getElementById(id);
+    if (el) {
+      el.value = datos[id];
+      el.dispatchEvent(new Event('input'));
+    }
+  });
+  if (datos['_mode']) {
+    const btn = document.querySelector(`.mode-btn[data-mode="${datos['_mode']}"]`);
+    if (btn) btn.click();
+  }
+  const cotizadorTab = document.querySelector('.tab[data-view="cotizador"]');
+  if (cotizadorTab) cotizadorTab.click();
+}
+
+// Historial
+async function cargarHistorial() {
+  const listEl = document.getElementById('historial-list');
+  listEl.innerHTML = '<div class="historial-empty">Cargando...</div>';
+
+  const { data, error } = await sb
+    .from('cotizaciones')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    listEl.innerHTML = '<div class="historial-empty">Error al cargar el historial.<br><small>' + esc(error.message) + '</small></div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    listEl.innerHTML = '<div class="historial-empty">No hay cotizaciones guardadas todavía.<br>Usá el botón <strong>Guardar</strong> en el header para registrar una.</div>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  data.forEach(item => {
+    const fecha = new Date(item.created_at).toLocaleString('es-AR', {
+      day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
+    });
+    const canDelete = currentUser && item.user_id === currentUser.id;
+    const div = document.createElement('div');
+    div.className = 'historial-item';
+    const kpisHtml = (item.datos._rev_month || item.datos._margin_month) ? `
+      <div class="historial-kpis">
+        ${item.datos._rev_month ? `<div class="historial-kpi"><div class="historial-kpi-label">Facturación/mes</div><div class="historial-kpi-value">${esc(item.datos._rev_month)}</div></div>` : ''}
+        ${item.datos._margin_month ? `<div class="historial-kpi"><div class="historial-kpi-label">Margen/mes</div><div class="historial-kpi-value">${esc(item.datos._margin_month)}</div></div>` : ''}
+      </div>` : '';
+    const deleteBtn = canDelete
+      ? `<button class="btn" style="color:var(--red);border-color:rgba(248,113,113,0.3);" onclick="eliminarCotizacion('${item.id}',this)">Borrar</button>`
+      : '';
+    div.innerHTML = `
+      <div class="historial-info">
+        <div class="historial-nombre">${esc(item.nombre)}</div>
+        <div class="historial-meta">${fecha} · ${esc(item.user_email || '—')}</div>
+      </div>
+      ${kpisHtml}
+      <div class="historial-actions">
+        <button class="btn" onclick='restaurarEstado(${JSON.stringify(item.datos)})'>Cargar</button>
+        ${deleteBtn}
+      </div>
+    `;
+    listEl.appendChild(div);
+  });
+}
+
+async function eliminarCotizacion(id, btn) {
+  if (!confirm('¿Eliminar esta cotización?')) return;
+  btn.disabled = true;
+  const { error } = await sb.from('cotizaciones').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); btn.disabled = false; }
+  else cargarHistorial();
+}
+
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+initAuth();
 </script>
 
 </body>

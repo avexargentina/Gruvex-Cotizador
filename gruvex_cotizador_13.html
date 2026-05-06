@@ -1,0 +1,3523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gruvex · Cotizador y Propuestas a Prestadores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #161F2E;
+    --navy-2: #1F2A3D;
+    --navy-3: #2A3650;
+    --blue: #3561D4;
+    --blue-soft: #4F7AE8;
+    --blue-bg: rgba(53, 97, 212, 0.08);
+    --ink: #0A0F18;
+    --paper: #FAFAF7;
+    --paper-2: #F2F1EB;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.18);
+    --muted: rgba(255, 255, 255, 0.55);
+    --text: rgba(255, 255, 255, 0.92);
+    --green: #4ADE80;
+    --amber: #FBBF24;
+    --red: #F87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 800px 600px at 15% 0%, rgba(53, 97, 212, 0.12), transparent 60%),
+      radial-gradient(ellipse 600px 400px at 100% 100%, rgba(53, 97, 212, 0.08), transparent 60%),
+      var(--navy);
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ============ HEADER ============ */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(22, 31, 46, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { display: block; }
+
+  .logo-text { display: flex; flex-direction: column; line-height: 1; }
+  .logo-text .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .logo-text .sub {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.25);
+    padding: 5px;
+    border-radius: 100px;
+    border: 1px solid var(--line);
+  }
+
+  .tab {
+    padding: 9px 22px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: var(--blue);
+    color: white;
+    font-weight: 600;
+  }
+
+  .header-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ============ MAIN ============ */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  .page-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--blue-soft);
+    font-weight: 400;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 640px;
+    margin-bottom: 36px;
+  }
+
+  /* ============ COTIZADOR ============ */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .mode-toggle {
+    display: inline-flex;
+    background: rgba(0,0,0,0.25);
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+
+  .mode-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .mode-btn:hover { color: var(--text); }
+  .mode-btn.active {
+    background: var(--navy-3);
+    color: white;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .tier-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 4px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .tier-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .tier-btn:hover { background: rgba(255,255,255,0.04); }
+  .tier-btn.active { background: var(--blue); }
+  .tier-btn-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .tier-btn.active .tier-btn-name { color: white; }
+  .tier-btn-tag {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .tier-btn.active .tier-btn-tag { color: rgba(255,255,255,0.7); }
+
+  .tier-comparison {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin: 14px 0 0;
+  }
+  .tier-cell {
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 6px;
+  }
+  .tier-cell.active {
+    background: rgba(53, 97, 212, 0.15);
+    border: 1px solid rgba(53, 97, 212, 0.3);
+  }
+  .tier-cell-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .tier-cell-value {
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+  }
+
+  .zone-row {
+    display: grid;
+    grid-template-columns: 1fr 70px 60px;
+    gap: 6px;
+    align-items: center;
+  }
+  .zone-row input[type=text],
+  .zone-row input[type=number] {
+    padding: 6px 8px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .zone-row input[type=text] {
+    font-family: 'Manrope', sans-serif;
+    text-align: left;
+  }
+  .zone-row input[type=number] {
+    text-align: right;
+  }
+  .zone-row input:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  .zone-row-suffix {
+    font-size: 10px;
+    color: var(--muted);
+    padding-left: 4px;
+  }
+
+  .montecarlo-section {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-top: 28px;
+  }
+  .montecarlo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .montecarlo-title {
+    font-size: 11px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .montecarlo-sub {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 600px;
+  }
+  .montecarlo-percentiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .mc-stat {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .mc-stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .mc-stat-value {
+    font-size: 17px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.01em;
+  }
+  .mc-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .mc-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mc-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  @media (max-width: 980px) {
+    .montecarlo-percentiles { grid-template-columns: 1fr 1fr; }
+    .montecarlo-header { flex-direction: column; }
+  }
+
+  .be-cost-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .be-cost-row label {
+    font-size: 13px;
+    color: var(--muted);
+    flex: 1;
+  }
+  .be-cost-row input {
+    width: 140px;
+    padding: 7px 10px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: right;
+  }
+  .be-cost-row input:focus { outline: none; border-color: var(--blue); }
+
+  .be-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1.5px solid var(--blue);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-soft);
+  }
+  .be-total-row span:last-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .be-margin-row {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .be-margin-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .be-margin-value {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: white;
+    letter-spacing: -0.02em;
+  }
+  .be-margin-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .be-result {
+    background: linear-gradient(180deg, rgba(53, 97, 212, 0.12), rgba(53, 97, 212, 0.04));
+    border: 1px solid rgba(53, 97, 212, 0.3);
+    border-radius: 16px;
+    padding: 26px 28px;
+    margin-top: 24px;
+  }
+  .be-result-title {
+    font-size: 11px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .be-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .be-result-stat {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .be-result-stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .be-result-stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+    color: white;
+  }
+  .be-result-stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .be-runway {
+    margin-top: 22px;
+  }
+  .be-runway-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .be-runway-header span:last-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: white;
+  }
+  .be-runway-bar {
+    height: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .be-runway-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber), var(--green));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .be-runway-controls {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .be-runway-controls input {
+    padding: 6px 10px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-align: right;
+  }
+
+  .be-scenarios {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(53, 97, 212, 0.2);
+  }
+  .be-scenarios-title {
+    font-size: 11px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .be-scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .be-scenario {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .be-scenario-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .be-scenario-value {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .be-scenario-value.pos { color: var(--green); }
+  .be-scenario-value.neg { color: var(--red); }
+  .be-scenario-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  @media (max-width: 980px) {
+    .be-result-grid { grid-template-columns: 1fr; }
+    .be-scenarios-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .mc-brief {
+    margin-top: 22px;
+    padding: 22px 24px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    border-left: 3px solid var(--blue);
+  }
+  .mc-brief.healthy { border-left-color: var(--green); }
+  .mc-brief.warn { border-left-color: var(--amber); }
+  .mc-brief.danger { border-left-color: var(--red); }
+
+  .mc-brief-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mc-brief-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .mc-brief.healthy .mc-brief-icon {
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--green);
+  }
+  .mc-brief.warn .mc-brief-icon {
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--amber);
+  }
+  .mc-brief.danger .mc-brief-icon {
+    background: rgba(248, 113, 113, 0.15);
+    color: var(--red);
+  }
+  .mc-brief-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: white;
+    margin-bottom: 3px;
+  }
+  .mc-brief-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mc-brief-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .mc-brief-item {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .mc-brief-item.mc-brief-action {
+    background: rgba(53, 97, 212, 0.1);
+    border: 1px solid rgba(53, 97, 212, 0.25);
+    grid-column: span 2;
+  }
+  .mc-brief-item-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .mc-brief-item.mc-brief-action .mc-brief-item-label {
+    color: var(--blue-soft);
+  }
+  .mc-brief-item-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  @media (max-width: 980px) {
+    .mc-brief-grid { grid-template-columns: 1fr; }
+    .mc-brief-item.mc-brief-action { grid-column: span 1; }
+  }
+
+  .panel {
+    background: linear-gradient(180deg, var(--navy-2), var(--navy-2) 60%, rgba(31,42,61,0.7));
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 24px;
+  }
+
+  .panel-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: var(--blue);
+    border-radius: 50%;
+  }
+
+  .control {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .control:last-child { border-bottom: 0; padding-bottom: 0; }
+
+  .control label {
+    font-size: 13px;
+    color: var(--muted);
+    flex: 0 0 130px;
+  }
+
+  .control input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  .control input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--blue);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--navy);
+    transition: transform 0.1s;
+  }
+  .control input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .control input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--blue);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid var(--navy);
+  }
+
+  .control .out {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 90px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    color: white;
+  }
+
+  .panel-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-style: italic;
+  }
+
+  /* ============ KPI cards ============ */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin: 32px 0 14px;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .kpi {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .kpi:hover { border-color: var(--line-strong); }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .kpi-value {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .kpi.accent { border-color: rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.04); }
+  .kpi.accent .kpi-value { color: var(--green); }
+
+  .kpi.danger { border-color: rgba(248, 113, 113, 0.25); background: rgba(248, 113, 113, 0.04); }
+  .kpi.danger .kpi-value { color: var(--red); }
+
+  .kpi.blue { border-color: rgba(53, 97, 212, 0.3); background: rgba(53, 97, 212, 0.06); }
+  .kpi.blue .kpi-value { color: var(--blue-soft); }
+
+  .highlight-box {
+    background: linear-gradient(90deg, rgba(53, 97, 212, 0.12), rgba(53, 97, 212, 0.04));
+    border: 1px solid rgba(53, 97, 212, 0.3);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .highlight-box .lbl { font-size: 12px; color: var(--muted); }
+  .highlight-box .val {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--blue-soft);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.02em;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .btn {
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .btn:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .btn.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+    font-weight: 600;
+  }
+  .btn.primary:hover {
+    background: var(--blue-soft);
+    border-color: var(--blue-soft);
+  }
+
+  /* ============ ARMADOR DE PROPUESTAS ============ */
+  .builder-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .form-panel {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    position: sticky;
+    top: 100px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .form-group input[type=text],
+  .form-group input[type=number],
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  .form-group textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+
+  .form-divider {
+    height: 1px;
+    background: var(--line);
+    margin: 18px 0;
+  }
+
+  /* PROPUESTA (output) */
+  .proposal {
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 16px;
+    padding: 56px 64px;
+    font-family: 'Manrope', sans-serif;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .proposal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--navy), var(--blue));
+  }
+
+  .proposal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .proposal-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--navy);
+  }
+  .proposal-logo .brand {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+  }
+  .proposal-logo .sub {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: rgba(0,0,0,0.5);
+    margin-top: 3px;
+  }
+
+  .proposal-meta {
+    text-align: right;
+    font-size: 11px;
+    color: rgba(0,0,0,0.6);
+    line-height: 1.7;
+  }
+  .proposal-meta strong { color: var(--ink); font-weight: 600; }
+
+  .proposal h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .proposal .lead {
+    font-size: 14px;
+    color: rgba(0,0,0,0.65);
+    margin-bottom: 32px;
+  }
+
+  .proposal-section {
+    margin-bottom: 28px;
+  }
+  .proposal-section h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--navy);
+  }
+
+  .proposal p {
+    font-size: 13.5px;
+    color: rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+  }
+
+  .proposal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+  .proposal-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .proposal-table td:first-child {
+    color: rgba(0,0,0,0.6);
+    width: 50%;
+  }
+  .proposal-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .proposal-table tr.total td {
+    border-top: 2px solid var(--navy);
+    border-bottom: 0;
+    padding-top: 14px;
+    font-size: 14px;
+    color: var(--navy);
+  }
+  .proposal-table tr.total td:last-child {
+    color: var(--blue);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .proposal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 8px 0;
+  }
+  .proposal-card {
+    background: rgba(53, 97, 212, 0.05);
+    border-left: 3px solid var(--blue);
+    padding: 14px 16px;
+    border-radius: 4px;
+  }
+  .proposal-card .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(0,0,0,0.55);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .proposal-card .val {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .proposal-card .hint {
+    font-size: 11px;
+    color: rgba(0,0,0,0.5);
+    margin-top: 4px;
+  }
+
+  .proposal-list {
+    list-style: none;
+    padding: 0;
+  }
+  .proposal-list li {
+    font-size: 13px;
+    color: rgba(0,0,0,0.78);
+    padding: 6px 0 6px 22px;
+    position: relative;
+  }
+  .proposal-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  .proposal-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    font-size: 11px;
+    color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .proposal-footer strong { color: var(--navy); }
+
+  .builder-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  /* PRINT */
+  /* ============ PLANES CLIENTE FINAL ============ */
+  .planes-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .meta-card {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .meta-card label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .meta-card select,
+  .meta-card input {
+    width: 100%;
+    padding: 8px 10px;
+    background: var(--navy);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    color: white;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .meta-card select:focus, .meta-card input:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+
+  .planes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .plan-card {
+    background: var(--navy-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .plan-card:hover { border-color: var(--line-strong); }
+
+  .plan-card.featured {
+    border: 1.5px solid var(--blue);
+    background: linear-gradient(180deg, rgba(53, 97, 212, 0.08), var(--navy-2));
+  }
+  .plan-card.featured::before {
+    content: 'Recomendado';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--blue);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .plan-name-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    color: white;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 0;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .plan-name-input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-left: -4px;
+  }
+
+  .plan-tier {
+    font-size: 10px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .plan-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .plan-price-currency {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .plan-price-input {
+    background: transparent;
+    border: 0;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 0;
+    width: 110px;
+    letter-spacing: -0.02em;
+  }
+  .plan-price-input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+  }
+  .plan-price-unit {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .plan-share {
+    background: rgba(53, 97, 212, 0.08);
+    border: 1px solid rgba(53, 97, 212, 0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .plan-share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .plan-share-label {
+    font-size: 11px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+  .plan-share-value-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  .plan-share-input {
+    width: 50px;
+    padding: 4px 8px;
+    background: var(--navy-3);
+    border: 1px solid rgba(53, 97, 212, 0.3);
+    border-radius: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: right;
+  }
+  .plan-share-input:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+  .plan-share-pct {
+    font-size: 12px;
+    color: var(--blue-soft);
+    font-weight: 600;
+  }
+  .plan-share-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    outline: none;
+  }
+  .plan-share-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--blue);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--navy);
+  }
+  .plan-share-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--blue);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--navy);
+  }
+
+  .blended-summary {
+    background: linear-gradient(180deg, rgba(53, 97, 212, 0.12), rgba(53, 97, 212, 0.04));
+    border: 1px solid rgba(53, 97, 212, 0.3);
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-top: 18px;
+  }
+  .blended-summary-title {
+    font-size: 11px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .blended-summary-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .blended-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .blended-stat {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .blended-stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .blended-stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.01em;
+  }
+  .blended-stat-value.pos { color: var(--green); }
+  .blended-stat-value.neg { color: var(--red); }
+  @media (max-width: 980px) {
+    .blended-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .plan-config {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+
+  .plan-config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+  }
+  .plan-config-row label {
+    font-size: 12px;
+    color: var(--muted);
+    flex: 1;
+  }
+  .plan-config-row input[type=number] {
+    width: 70px;
+    padding: 5px 8px;
+    background: var(--navy-3);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: right;
+  }
+  .plan-config-row input:focus {
+    outline: none;
+    border-color: var(--blue);
+  }
+
+  .plan-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .plan-stat {
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .plan-stat-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .plan-stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .plan-stat-value.pos { color: var(--green); }
+  .plan-stat-value.neg { color: var(--red); }
+
+  .plan-margin-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+  .plan-margin-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.25s ease;
+  }
+  .plan-margin-bar-fill.warn { background: var(--amber); }
+  .plan-margin-bar-fill.bad { background: var(--red); }
+
+  /* Propuesta cliente final */
+  .proposal-planes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 12px 0;
+  }
+  .proposal-plan {
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 8px;
+    padding: 18px 16px;
+    background: white;
+  }
+  .proposal-plan.featured {
+    border: 2px solid var(--blue);
+    background: rgba(53, 97, 212, 0.03);
+    position: relative;
+  }
+  .proposal-plan.featured::before {
+    content: 'Recomendado';
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: var(--blue);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .proposal-plan-tier {
+    font-size: 9px;
+    color: var(--blue);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .proposal-plan-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+  .proposal-plan-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 2px;
+    letter-spacing: -0.02em;
+  }
+  .proposal-plan-unit {
+    font-size: 10px;
+    color: rgba(0,0,0,0.55);
+    margin-bottom: 14px;
+  }
+  .proposal-plan-features {
+    list-style: none;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  .proposal-plan-features li {
+    font-size: 11.5px;
+    color: rgba(0,0,0,0.75);
+    padding: 4px 0 4px 16px;
+    position: relative;
+  }
+  .proposal-plan-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  @media print {
+    body { background: white; }
+    header, .form-panel, .builder-actions, .actions, main > .page-title, main > h1, main > .subtitle { display: none !important; }
+    main { padding: 0; max-width: none; }
+    .builder-grid { display: block; grid-template-columns: 1fr; }
+    .proposal {
+      box-shadow: none;
+      border-radius: 0;
+      padding: 24px 32px;
+      page-break-inside: avoid;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .builder-grid { grid-template-columns: 1fr; }
+    .form-panel { position: static; }
+    .proposal { padding: 32px; }
+    h1 { font-size: 28px; }
+    .planes-grid { grid-template-columns: 1fr; }
+    .planes-meta { grid-template-columns: 1fr 1fr; }
+    .proposal-planes-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="7" fill="#3561D4"/>
+          <path d="M9 9 L16 16 L9 23 M23 9 L16 16 L23 23" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="brand">Gruvex</span>
+        <span class="sub">Internal Tool</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-view="cotizador">Cotizador</button>
+      <button class="tab" data-view="propuesta">Propuesta a prestador</button>
+      <button class="tab" data-view="planes">Planes cliente final</button>
+      <button class="tab" data-view="breakeven">Break-even</button>
+    </div>
+
+    <div class="header-meta" id="dateNow">—</div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ COTIZADOR ============ -->
+<div class="view active" id="view-cotizador">
+  <div class="page-title">Cotizador interno</div>
+  <h1>Pricing y cobertura · <em>CABA + AMBA</em></h1>
+  <p class="subtitle">Estimación de costos a prestador, márgenes Gruvex y comparativa contra precios spot del mercado. Ajustá los parámetros y generá la propuesta al prestador desde el botón.</p>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" data-mode="b2b">B2B · Flotas</button>
+    <button class="mode-btn" data-mode="b2c">B2C · Por demanda</button>
+  </div>
+
+  <div class="grid-2">
+
+    <div class="panel">
+      <div class="panel-title">Tarifa al prestador</div>
+
+      <div class="tier-selector">
+        <button class="tier-btn" data-tier="economico">
+          <span class="tier-btn-name">Económico</span>
+          <span class="tier-btn-tag">−15%</span>
+        </button>
+        <button class="tier-btn active" data-tier="estandar">
+          <span class="tier-btn-name">Estándar</span>
+          <span class="tier-btn-tag">base</span>
+        </button>
+        <button class="tier-btn" data-tier="premium">
+          <span class="tier-btn-name">Premium</span>
+          <span class="tier-btn-tag">+20%</span>
+        </button>
+      </div>
+
+      <div class="control">
+        <label>Movida base</label>
+        <input type="range" id="movida" min="30000" max="120000" value="60000" step="500">
+        <span class="out" id="movida-out">$60.000</span>
+      </div>
+
+      <div class="control">
+        <label>Km adicional</label>
+        <input type="range" id="km" min="1500" max="8000" value="3625" step="125">
+        <span class="out" id="km-out">$3.625</span>
+      </div>
+
+      <div class="control">
+        <label>Km incluidos</label>
+        <input type="range" id="kmInc" min="0" max="20" value="10" step="1">
+        <span class="out" id="kmInc-out">10 km</span>
+      </div>
+
+      <div class="tier-comparison" id="tier-comparison">
+        <!-- Generado por JS: muestra las 3 tarifas paralelas -->
+      </div>
+
+      <div class="panel-hint">Spot mercado promedio: $83.300 movida · $5.000/km</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Servicio promedio</div>
+
+      <div class="control" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 11px 0; border-bottom: 1px solid var(--line);">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label style="font-size: 13px; color: var(--muted); margin: 0;">Distancia ponderada</label>
+          <span class="out" id="dist-out" style="font-size: 13px; font-weight: 600;">20 km</span>
+        </div>
+        <div id="zones-builder" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      </div>
+      <input type="hidden" id="dist" value="20">
+
+      <div class="control">
+        <label>Markup Gruvex</label>
+        <input type="range" id="markup" min="20" max="80" value="40" step="5">
+        <span class="out" id="markup-out">40%</span>
+      </div>
+
+      <div class="control" id="b2b-input">
+        <label>Vehículos expuestos</label>
+        <input type="number" id="flota-num" min="1" max="50000" value="400" step="1" style="flex: 1; padding: 8px 12px; background: var(--navy); border: 1px solid var(--line); border-radius: 7px; color: white; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; text-align: right;">
+        <input type="hidden" id="flota" value="400">
+        <span class="out" id="flota-out" style="display:none;">400</span>
+      </div>
+
+      <div class="control" id="b2c-input" style="display:none;">
+        <label>Servicios/mes</label>
+        <input type="range" id="servB2c" min="10" max="500" value="100" step="10">
+        <span class="out" id="servB2c-out">100</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel" id="b2b-freq">
+    <div class="panel-title">Frecuencia esperada</div>
+    <div class="control">
+      <label>% flota mensual</label>
+      <input type="range" id="freq" min="0.5" max="10" value="2" step="0.5">
+      <span class="out" id="freq-out">2.0%</span>
+    </div>
+    <div class="panel-hint" id="freq-hint">2% sobre 400 vehículos = 8 servicios/mes</div>
+  </div>
+
+  <div class="panel" id="b2b-pricing">
+    <div class="panel-title">Cotización por vehículo expuesto</div>
+
+    <div style="display: flex; gap: 6px; margin-bottom: 14px; padding: 4px; background: rgba(0,0,0,0.25); border-radius: 8px; width: fit-content; border: 1px solid var(--line);">
+      <button class="pricing-mode-btn active" data-pmode="markup" style="padding: 7px 14px; font-size: 12px; font-weight: 500; color: white; background: var(--navy-3); border: 0; border-radius: 5px; cursor: pointer; font-family: inherit;">Calcular desde markup</button>
+      <button class="pricing-mode-btn" data-pmode="target" style="padding: 7px 14px; font-size: 12px; font-weight: 500; color: var(--muted); background: transparent; border: 0; border-radius: 5px; cursor: pointer; font-family: inherit;">Calcular desde precio objetivo</button>
+    </div>
+
+    <div class="control" id="ctrl-target" style="display:none;">
+      <label>Precio / vehículo / mes</label>
+      <input type="range" id="targetPrice" min="500" max="15000" value="3000" step="100">
+      <span class="out" id="targetPrice-out">$3.000</span>
+    </div>
+
+    <div class="panel-hint" id="pricing-hint">Modo markup: el precio por vehículo se deriva del markup configurado arriba. Cambialo a "precio objetivo" para fijar la tarifa que querés cobrarle al cliente y ver si te cierra el margen.</div>
+  </div>
+
+  <div class="highlight-box" id="b2b-extra">
+    <div>
+      <div class="lbl" style="font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; margin-bottom: 4px;">Precio por vehículo expuesto / mes</div>
+      <div style="font-size: 12px; color: var(--muted); margin-top: 2px;">Lo que le facturás al cliente · cobro mensual fijo independiente del consumo</div>
+    </div>
+    <div class="val" id="per-vehicle">$2.695</div>
+  </div>
+
+  <div class="section-label">Por servicio</div>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Costo prestador</div>
+      <div class="kpi-value" id="cost-unit">$96.250</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Precio cliente / servicio</div>
+      <div class="kpi-value" id="price-unit">$134.750</div>
+    </div>
+    <div class="kpi accent">
+      <div class="kpi-label">Margen unitario</div>
+      <div class="kpi-value" id="margin-unit">$38.500</div>
+    </div>
+    <div class="kpi accent">
+      <div class="kpi-label">vs. spot mercado</div>
+      <div class="kpi-value" id="spot-savings">−23%</div>
+    </div>
+  </div>
+
+  <div class="section-label">Mensual sobre toda la cuenta</div>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label" id="lbl-serv">Servicios/mes esperados</div>
+      <div class="kpi-value" id="serv-month">8</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Costo total prestador</div>
+      <div class="kpi-value" id="cost-month">$770.000</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Facturación cliente</div>
+      <div class="kpi-value" id="rev-month">$1.078.000</div>
+    </div>
+    <div class="kpi accent">
+      <div class="kpi-label">Margen Gruvex</div>
+      <div class="kpi-value" id="margin-month">$308.000</div>
+    </div>
+  </div>
+
+  <div class="montecarlo-section" id="montecarlo-section">
+    <div class="montecarlo-header">
+      <div>
+        <div class="montecarlo-title">Análisis de sensibilidad · Montecarlo</div>
+        <div class="montecarlo-sub">10.000 escenarios simulados con frecuencia y distancia variando ±30% sobre los valores configurados.</div>
+      </div>
+      <button class="btn" id="run-montecarlo">Ejecutar simulación</button>
+    </div>
+    <div id="montecarlo-results" style="display: none;">
+      <div class="montecarlo-percentiles">
+        <div class="mc-stat">
+          <div class="mc-stat-label">P10 · pesimista</div>
+          <div class="mc-stat-value" id="mc-p10">—</div>
+        </div>
+        <div class="mc-stat">
+          <div class="mc-stat-label">P50 · mediano</div>
+          <div class="mc-stat-value" id="mc-p50">—</div>
+        </div>
+        <div class="mc-stat">
+          <div class="mc-stat-label">P90 · optimista</div>
+          <div class="mc-stat-value" id="mc-p90">—</div>
+        </div>
+        <div class="mc-stat">
+          <div class="mc-stat-label">% escenarios negativos</div>
+          <div class="mc-stat-value" id="mc-neg">—</div>
+        </div>
+      </div>
+      <canvas id="mc-histogram" width="800" height="180" style="width: 100%; height: 180px; margin-top: 16px; border-radius: 10px;"></canvas>
+      <div class="mc-legend">
+        <span class="mc-legend-item"><span class="mc-legend-dot" style="background: var(--green);"></span>Margen positivo</span>
+        <span class="mc-legend-item"><span class="mc-legend-dot" style="background: var(--red);"></span>Margen negativo</span>
+        <span class="mc-legend-item"><span class="mc-legend-dot" style="background: var(--blue);"></span>P50 (mediana)</span>
+      </div>
+
+      <div class="mc-brief" id="mc-brief">
+        <div class="mc-brief-header">
+          <div class="mc-brief-icon" id="mc-brief-icon">●</div>
+          <div>
+            <div class="mc-brief-title" id="mc-brief-title">Lectura del análisis</div>
+            <div class="mc-brief-subtitle" id="mc-brief-subtitle">—</div>
+          </div>
+        </div>
+
+        <div class="mc-brief-grid">
+          <div class="mc-brief-item">
+            <div class="mc-brief-item-label">Diagnóstico</div>
+            <div class="mc-brief-item-text" id="mc-brief-diag">—</div>
+          </div>
+          <div class="mc-brief-item">
+            <div class="mc-brief-item-label">Variabilidad del resultado</div>
+            <div class="mc-brief-item-text" id="mc-brief-var">—</div>
+          </div>
+          <div class="mc-brief-item">
+            <div class="mc-brief-item-label">Riesgo concreto</div>
+            <div class="mc-brief-item-text" id="mc-brief-risk">—</div>
+          </div>
+          <div class="mc-brief-item mc-brief-action">
+            <div class="mc-brief-item-label">Recomendación</div>
+            <div class="mc-brief-item-text" id="mc-brief-action">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn primary" id="goto-propuesta">Generar propuesta al prestador →</button>
+    <button class="btn" onclick="resetDefaults()">Restaurar valores</button>
+  </div>
+</div>
+
+<!-- ============ ARMADOR ============ -->
+<div class="view" id="view-propuesta">
+  <div class="page-title">Armador de propuestas</div>
+  <h1>Propuesta comercial · <em>Prestador</em></h1>
+  <p class="subtitle">Los valores económicos se sincronizan con el cotizador. Completá los datos del prestador y exportá la propuesta lista para enviar.</p>
+
+  <div class="builder-grid">
+
+    <aside class="form-panel">
+      <div class="form-group">
+        <label>Nombre del prestador</label>
+        <input type="text" id="f-prestador" value="Grúas Valentín">
+      </div>
+      <div class="form-group">
+        <label>Persona de contacto</label>
+        <input type="text" id="f-contacto" placeholder="Ej: Valentín Gómez" value="">
+      </div>
+      <div class="form-group">
+        <label>Zona de cobertura</label>
+        <select id="f-zona">
+          <option>CABA</option>
+          <option>CABA + Zona Norte</option>
+          <option>CABA + Zona Sur</option>
+          <option>CABA + Zona Oeste</option>
+          <option selected>CABA + AMBA completo</option>
+          <option>La Plata y alrededores</option>
+        </select>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-group">
+        <label>Volumen estimado mensual</label>
+        <input type="number" id="f-volumen" value="40" min="0">
+      </div>
+      <div class="form-group">
+        <label>Plazo de pago</label>
+        <select id="f-pago">
+          <option selected>Quincenal</option>
+          <option>Semanal</option>
+          <option>Mensual a 30 días</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>SLA tiempo de respuesta</label>
+        <select id="f-sla">
+          <option>30 minutos</option>
+          <option selected>45 minutos</option>
+          <option>60 minutos</option>
+          <option>90 minutos</option>
+        </select>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-group">
+        <label>Tolerancia exceso leve</label>
+        <input type="text" id="f-multa-leve" value="15 minutos sobre SLA · descuento 10% del servicio">
+      </div>
+      <div class="form-group">
+        <label>Tolerancia exceso grave</label>
+        <input type="text" id="f-multa-grave" value="30 minutos sobre SLA · servicio no se factura">
+      </div>
+      <div class="form-group">
+        <label>Penalidad por incumplimientos repetidos</label>
+        <input type="text" id="f-multa-repetida" value="3+ excesos graves en el mes: revisión del acuerdo">
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-group">
+        <label>Vigencia de la propuesta</label>
+        <input type="text" id="f-vigencia" value="30 días desde la fecha de emisión">
+      </div>
+      <div class="form-group">
+        <label>Notas adicionales (opcional)</label>
+        <textarea id="f-notas" placeholder="Condiciones particulares, exclusiones, etc."></textarea>
+      </div>
+
+      <div class="builder-actions">
+        <button class="btn primary" onclick="window.print()">Imprimir / PDF</button>
+        <button class="btn" onclick="copyProposal()">Copiar texto</button>
+      </div>
+    </aside>
+
+    <article class="proposal" id="proposal">
+      <div class="proposal-header">
+        <div class="proposal-logo">
+          <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="7" fill="#161F2E"/>
+            <path d="M9 9 L16 16 L9 23 M23 9 L16 16 L23 23" stroke="#3561D4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <div>
+            <div class="brand">Gruvex</div>
+            <div class="sub">Plataforma de asistencia vehicular</div>
+          </div>
+        </div>
+        <div class="proposal-meta">
+          <div><strong>Propuesta N°</strong> <span id="p-numero">GVX-2026-0001</span></div>
+          <div><strong>Fecha</strong> <span id="p-fecha">—</span></div>
+          <div><strong>Vigencia</strong> <span id="p-vigencia">30 días</span></div>
+        </div>
+      </div>
+
+      <h2>Acuerdo de prestación de servicios de remolque y auxilio</h2>
+      <p class="lead">Para <strong id="p-prestador">Grúas Valentín</strong> · <span id="p-zona">CABA + AMBA completo</span></p>
+
+      <div class="proposal-section">
+        <h3>01 · Contexto</h3>
+        <p>Gruvex es una plataforma digital de asistencia vehicular que conecta flotas, aseguradoras y usuarios finales con prestadores de servicios de grúa, remolque y auxilio mecánico en CABA y AMBA. Operamos sobre la infraestructura tecnológica y operativa de Avex, con un equipo de soporte propio y herramientas de geolocalización en tiempo real.</p>
+        <p>Buscamos sumar a <strong id="p-prestador-2">Grúas Valentín</strong> como prestador asociado bajo un esquema de tarifas preferenciales a cambio de un volumen sostenido de servicios mensuales.</p>
+      </div>
+
+      <div class="proposal-section">
+        <h3>02 · Tarifas acordadas</h3>
+        <p style="margin-bottom: 10px;">Las tarifas detalladas a continuación reflejan un descuento sobre el precio spot promedio del mercado, justificado por el volumen mensual estimado y la previsibilidad de demanda que aporta Gruvex.</p>
+        <table class="proposal-table">
+          <tr>
+            <td>Movida base (incluye <span id="p-kminc">10</span> km)</td>
+            <td id="p-movida">$60.000</td>
+          </tr>
+          <tr>
+            <td>Kilómetro adicional</td>
+            <td id="p-km">$3.625</td>
+          </tr>
+          <tr>
+            <td>Servicio promedio estimado (<span id="p-dist">20</span> km)</td>
+            <td id="p-prom">$96.250</td>
+          </tr>
+          <tr class="total">
+            <td>Facturación mensual estimada</td>
+            <td id="p-facturacion">$3.850.000</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="proposal-section">
+        <h3>03 · Volumen y compromisos</h3>
+        <div class="proposal-grid">
+          <div class="proposal-card">
+            <div class="lbl">Volumen mensual estimado</div>
+            <div class="val"><span id="p-volumen">40</span> servicios</div>
+            <div class="hint">Estimación basada en proyección de demanda; no constituye un mínimo garantizado.</div>
+          </div>
+          <div class="proposal-card">
+            <div class="lbl">Plazo de pago</div>
+            <div class="val" id="p-pago">Quincenal</div>
+            <div class="hint">Liquidación contra reporte de servicios efectuados.</div>
+          </div>
+          <div class="proposal-card">
+            <div class="lbl">Modalidad</div>
+            <div class="val">Variable puro</div>
+            <div class="hint">Pago únicamente por servicio efectivamente realizado.</div>
+          </div>
+          <div class="proposal-card">
+            <div class="lbl">Tiempo de respuesta</div>
+            <div class="val" id="p-sla">45 min</div>
+            <div class="hint">Llegada al lugar del incidente desde la asignación del servicio.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proposal-section">
+        <h3>04 · Condiciones operativas</h3>
+        <ul class="proposal-list">
+          <li>Asignación de servicios vía WhatsApp y/o panel web Gruvex, con datos completos del incidente y geolocalización del cliente.</li>
+          <li>Confirmación de aceptación dentro de los 5 minutos de recibida la asignación; en caso contrario, el servicio se reasigna automáticamente.</li>
+          <li>Reporte digital al finalizar cada servicio: foto del vehículo en origen y destino, kilómetros recorridos efectivos, hora de inicio y cierre.</li>
+          <li>Facturación electrónica a Gruvex con detalle de servicios prestados según ciclo de pago acordado.</li>
+          <li>Cobertura geográfica comprometida: <span id="p-zona-2">CABA + AMBA completo</span>.</li>
+          <li>Las tarifas acordadas se ajustarán trimestralmente por el índice IPC publicado por INDEC, con tope del 10% por trimestre.</li>
+        </ul>
+      </div>
+
+      <div class="proposal-section">
+        <h3>05 · Niveles de servicio y penalidades</h3>
+        <p style="margin-bottom: 12px;">El cumplimiento del SLA pactado es condición esencial del acuerdo. Los excesos sobre el tiempo de respuesta comprometido aplicarán los siguientes ajustes:</p>
+        <table class="proposal-table">
+          <tr>
+            <td>SLA comprometido (tiempo de respuesta)</td>
+            <td id="p-sla-2">45 min</td>
+          </tr>
+          <tr>
+            <td>Exceso leve</td>
+            <td id="p-multa-leve" style="font-size: 12px; text-align: right;">15 min sobre SLA · −10%</td>
+          </tr>
+          <tr>
+            <td>Exceso grave</td>
+            <td id="p-multa-grave" style="font-size: 12px; text-align: right;">30 min sobre SLA · no facturable</td>
+          </tr>
+          <tr>
+            <td>Reincidencia</td>
+            <td id="p-multa-repetida" style="font-size: 12px; text-align: right;">3+ excesos graves: revisión</td>
+          </tr>
+        </table>
+        <p style="font-size: 12px; margin-top: 10px; color: rgba(0,0,0,0.6); font-style: italic;">El cumplimiento se mide sobre el timestamp de asignación del servicio en plataforma Gruvex hasta el arribo confirmado al lugar del incidente.</p>
+      </div>
+
+      <div class="proposal-section" id="p-notas-section" style="display:none;">
+        <h3>06 · Notas adicionales</h3>
+        <p id="p-notas">—</p>
+      </div>
+
+      <div class="proposal-section">
+        <h3>07 · Próximos pasos</h3>
+        <ul class="proposal-list">
+          <li>Reunión de alineación operativa para coordinar onboarding técnico (15-30 minutos).</li>
+          <li>Firma de acuerdo marco y carga de datos fiscales y bancarios.</li>
+          <li>Período inicial de prueba de 30 días con revisión conjunta de KPIs operativos.</li>
+        </ul>
+      </div>
+
+      <div class="proposal-footer">
+        <div>
+          <strong>Gruvex</strong> · Buenos Aires, Argentina<br>
+          contacto@gruvex.com.ar
+        </div>
+        <div style="text-align: right;">
+          Documento generado el <span id="p-fecha-2">—</span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</div>
+
+<!-- ============ PLANES CLIENTE FINAL ============ -->
+<div class="view" id="view-planes">
+  <div class="page-title">Planes cliente final</div>
+  <h1>Constructor de planes · <em>3 tiers configurables</em></h1>
+  <p class="subtitle">Definí servicios incluidos, kilómetros y precio por tier. Los márgenes se calculan automáticamente con el costo prestador del cotizador y la frecuencia de uso esperada.</p>
+
+  <div class="planes-meta">
+    <div class="meta-card">
+      <label>Tipo de cliente</label>
+      <select id="pl-tipo">
+        <option value="b2b" selected>B2B · Flotas (por vehículo/mes)</option>
+        <option value="b2c">B2C · Suscripción (por usuario/mes)</option>
+      </select>
+    </div>
+    <div class="meta-card">
+      <label>Frecuencia mensual de uso</label>
+      <input type="number" id="pl-uso" value="2" min="1" max="20" step="0.5">
+    </div>
+    <div class="meta-card">
+      <label>Tamaño de cuenta</label>
+      <input type="number" id="pl-tam" value="100" min="1" max="50000" step="1">
+    </div>
+    <div class="meta-card">
+      <label>Costo prestador / servicio</label>
+      <input type="text" id="pl-costo" value="—" readonly style="opacity: 0.7;">
+    </div>
+  </div>
+
+  <div class="planes-grid" id="planes-grid">
+    <!-- 3 cards generadas por JS -->
+  </div>
+
+  <div class="section-label">Resumen por plan (mensual sobre toda la cuenta)</div>
+  <div class="kpi-grid" id="planes-resumen-grid">
+    <!-- generado dinámicamente -->
+  </div>
+
+  <div class="blended-summary">
+    <div class="blended-summary-title">Resumen blended · mix de planes ponderado</div>
+    <div class="blended-summary-sub" id="blended-mix-desc">Aplicando el share de mix configurado en cada plan sobre el total de la cuenta.</div>
+    <div class="blended-grid">
+      <div class="blended-stat">
+        <div class="blended-stat-label">ARPU promedio</div>
+        <div class="blended-stat-value" id="blended-arpu">—</div>
+      </div>
+      <div class="blended-stat">
+        <div class="blended-stat-label">Facturación total / mes</div>
+        <div class="blended-stat-value" id="blended-rev">—</div>
+      </div>
+      <div class="blended-stat">
+        <div class="blended-stat-label">Costo total esperado</div>
+        <div class="blended-stat-value" id="blended-cost">—</div>
+      </div>
+      <div class="blended-stat">
+        <div class="blended-stat-label">Margen ponderado</div>
+        <div class="blended-stat-value" id="blended-margin">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions" style="margin-top: 28px;">
+    <button class="btn primary" id="goto-propuesta-cliente">Generar propuesta al cliente final →</button>
+    <button class="btn" onclick="resetPlanes()">Restaurar planes default</button>
+  </div>
+
+  <!-- Propuesta cliente final embebida abajo -->
+  <div id="propuesta-cliente-wrap" style="display:none; margin-top: 40px;">
+    <div class="builder-grid">
+      <aside class="form-panel">
+        <div class="form-group">
+          <label>Empresa cliente</label>
+          <input type="text" id="pc-cliente" value="Rentadora XYZ S.A.">
+        </div>
+        <div class="form-group">
+          <label>Persona de contacto</label>
+          <input type="text" id="pc-contacto" placeholder="Ej: Juan Pérez · Director de Operaciones">
+        </div>
+        <div class="form-group">
+          <label>Tamaño de cuenta</label>
+          <input type="text" id="pc-tam-label" value="100 vehículos">
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-group">
+          <label>Tier recomendado</label>
+          <select id="pc-rec">
+            <option value="0">Básico</option>
+            <option value="1" selected>Plus</option>
+            <option value="2">Premium</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Vigencia de tarifas</label>
+          <input type="text" id="pc-vigencia" value="12 meses con ajuste trimestral por IPC (tope 10%)">
+        </div>
+        <div class="form-group">
+          <label>Notas adicionales (opcional)</label>
+          <textarea id="pc-notas" placeholder="Condiciones particulares, descuentos, exclusiones"></textarea>
+        </div>
+
+        <div class="builder-actions">
+          <button class="btn primary" onclick="window.print()">Imprimir / PDF</button>
+          <button class="btn" onclick="copyProposalCliente()">Copiar texto</button>
+          <button class="btn" onclick="hidePropuestaCliente()">Cerrar</button>
+        </div>
+      </aside>
+
+      <article class="proposal" id="proposal-cliente">
+        <div class="proposal-header">
+          <div class="proposal-logo">
+            <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="7" fill="#161F2E"/>
+              <path d="M9 9 L16 16 L9 23 M23 9 L16 16 L23 23" stroke="#3561D4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <div>
+              <div class="brand">Gruvex</div>
+              <div class="sub">Plataforma de asistencia vehicular</div>
+            </div>
+          </div>
+          <div class="proposal-meta">
+            <div><strong>Propuesta N°</strong> <span id="pc-numero">GVX-CF-2026-0001</span></div>
+            <div><strong>Fecha</strong> <span id="pc-fecha">—</span></div>
+            <div><strong>Vigencia</strong> 30 días</div>
+          </div>
+        </div>
+
+        <h2>Propuesta de servicios de asistencia vehicular</h2>
+        <p class="lead">Para <strong id="pc-cliente-out">Rentadora XYZ S.A.</strong> · <span id="pc-tam-out">100 vehículos</span></p>
+
+        <div class="proposal-section">
+          <h3>01 · Resumen ejecutivo</h3>
+          <p>Gruvex es una plataforma digital de asistencia vehicular operada sobre la infraestructura de Avex, con presencia en CABA y AMBA. Brindamos servicios de remolque, auxilio mecánico liviano y atención de incidentes, con soporte 24/7 vía WhatsApp y geolocalización en tiempo real.</p>
+          <p>La presente propuesta detalla <strong>tres planes adaptables</strong> al tamaño y necesidades de operación de <strong id="pc-cliente-out-2">Rentadora XYZ S.A.</strong>, con tarifas mensuales fijas que reemplazan los costos variables y volátiles del mercado spot de grúas.</p>
+        </div>
+
+        <div class="proposal-section">
+          <h3>02 · Planes disponibles</h3>
+          <div class="proposal-planes-grid" id="pc-planes-grid">
+            <!-- 3 planes inyectados por JS -->
+          </div>
+        </div>
+
+        <div class="proposal-section">
+          <h3>03 · Inversión mensual estimada</h3>
+          <table class="proposal-table">
+            <tr>
+              <td>Plan recomendado para tu operación</td>
+              <td id="pc-plan-rec-name">Plus</td>
+            </tr>
+            <tr>
+              <td>Precio por <span id="pc-unidad">vehículo</span> / mes</td>
+              <td id="pc-precio-unit">—</td>
+            </tr>
+            <tr>
+              <td>Tamaño de cuenta</td>
+              <td id="pc-tam-out-2">100</td>
+            </tr>
+            <tr class="total">
+              <td>Inversión mensual total</td>
+              <td id="pc-total">—</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="proposal-section">
+          <h3>04 · Qué incluye el servicio</h3>
+          <ul class="proposal-list">
+            <li>Atención 24/7 con tiempo de respuesta promedio menor a 45 minutos en CABA y AMBA.</li>
+            <li>Plataforma de seguimiento en tiempo real para el responsable de flota, con histórico de incidentes y reportes mensuales.</li>
+            <li>Servicios incluidos según el plan contratado, con kilometraje cubierto desde el lugar del incidente.</li>
+            <li>Servicios adicionales más allá del plan a tarifa preferencial cliente Gruvex (sin recargo de mercado spot).</li>
+            <li>Facturación electrónica única mensual y facilidad de conciliación contable.</li>
+          </ul>
+        </div>
+
+        <div class="proposal-section" id="pc-notas-section" style="display:none;">
+          <h3>05 · Notas adicionales</h3>
+          <p id="pc-notas-out">—</p>
+        </div>
+
+        <div class="proposal-section">
+          <h3>06 · Vigencia y ajustes</h3>
+          <p id="pc-vigencia-out">12 meses con ajuste trimestral por IPC (tope 10%)</p>
+        </div>
+
+        <div class="proposal-footer">
+          <div>
+            <strong>Gruvex</strong> · Buenos Aires, Argentina<br>
+            contacto@gruvex.com.ar
+          </div>
+          <div style="text-align: right;">
+            Documento generado el <span id="pc-fecha-2">—</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ BREAK-EVEN ============ -->
+<div class="view" id="view-breakeven">
+  <div class="page-title">Break-even Gruvex</div>
+  <h1>¿Cuántos clientes <em>necesitás</em> para cubrir costos?</h1>
+  <p class="subtitle">Ingresá los costos fijos mensuales de operar Gruvex y el modelo te dice cuántos clientes B2B y B2C harían falta para alcanzar punto de equilibrio según el ARPU configurado en la pestaña Planes.</p>
+
+  <div class="grid-2">
+
+    <div class="panel">
+      <div class="panel-title">Costos fijos mensuales</div>
+
+      <div class="be-cost-row">
+        <label>Equipo y sueldos</label>
+        <input type="number" id="be-sueldos" value="2500000" min="0" step="50000">
+      </div>
+      <div class="be-cost-row">
+        <label>Soporte y operaciones</label>
+        <input type="number" id="be-soporte" value="800000" min="0" step="50000">
+      </div>
+      <div class="be-cost-row">
+        <label>Infraestructura tecnológica</label>
+        <input type="number" id="be-infra" value="350000" min="0" step="25000">
+      </div>
+      <div class="be-cost-row">
+        <label>Herramientas y SaaS</label>
+        <input type="number" id="be-tools" value="180000" min="0" step="20000">
+      </div>
+      <div class="be-cost-row">
+        <label>Marketing y ventas</label>
+        <input type="number" id="be-marketing" value="450000" min="0" step="50000">
+      </div>
+      <div class="be-cost-row">
+        <label>Otros (legal, contable)</label>
+        <input type="number" id="be-otros" value="220000" min="0" step="20000">
+      </div>
+
+      <div class="be-total-row">
+        <span>Costo fijo total / mes</span>
+        <span id="be-total">$4.500.000</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Margen unitario disponible</div>
+      <p style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">El margen por unidad se calcula con el setup actual de la pestaña Planes (precios, mix, frecuencia, zonas).</p>
+
+      <div class="be-margin-row">
+        <div class="be-margin-label">ARPU blended</div>
+        <div class="be-margin-value" id="be-arpu">—</div>
+        <div class="be-margin-sub">por cliente / mes</div>
+      </div>
+
+      <div class="be-margin-row">
+        <div class="be-margin-label">Margen unitario blended</div>
+        <div class="be-margin-value" id="be-margen-unit">—</div>
+        <div class="be-margin-sub" id="be-margen-pct">— de margen</div>
+      </div>
+
+      <div class="be-margin-row" style="border-bottom: 0;">
+        <div class="be-margin-label">% del ARPU que es margen</div>
+        <div class="be-margin-value" id="be-margen-pct-only">—</div>
+        <div class="be-margin-sub">contribution margin</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="be-result" id="be-result">
+    <div class="be-result-title">Break-even mensual</div>
+    <div class="be-result-grid">
+      <div class="be-result-stat">
+        <div class="be-result-stat-label">Clientes necesarios</div>
+        <div class="be-result-stat-value" id="be-clientes">—</div>
+        <div class="be-result-stat-sub">para llegar a margen $0</div>
+      </div>
+      <div class="be-result-stat">
+        <div class="be-result-stat-label">Facturación de equilibrio</div>
+        <div class="be-result-stat-value" id="be-facturacion">—</div>
+        <div class="be-result-stat-sub">a partir de aquí: ganancia</div>
+      </div>
+      <div class="be-result-stat">
+        <div class="be-result-stat-label">Cuentas B2B equivalentes</div>
+        <div class="be-result-stat-value" id="be-cuentas-b2b">—</div>
+        <div class="be-result-stat-sub" id="be-cuentas-b2b-sub">flotas promedio de N vehículos</div>
+      </div>
+    </div>
+
+    <div class="be-runway">
+      <div class="be-runway-header">
+        <span>Camino al break-even</span>
+        <span id="be-runway-pct">0%</span>
+      </div>
+      <div class="be-runway-bar">
+        <div class="be-runway-fill" id="be-runway-fill"></div>
+      </div>
+      <div class="be-runway-controls">
+        <label style="font-size: 12px; color: var(--muted); margin-right: 8px;">Clientes actuales:</label>
+        <input type="number" id="be-actuales" value="0" min="0" step="1" style="width: 90px;">
+      </div>
+    </div>
+
+    <div class="be-scenarios">
+      <div class="be-scenarios-title">Escenarios de crecimiento</div>
+      <div class="be-scenarios-grid" id="be-scenarios-grid"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+(function() {
+  const $ = id => document.getElementById(id);
+  const fmt = n => '$' + Math.round(n).toLocaleString('es-AR');
+  const SPOT_MOVIDA = 83300;
+  const SPOT_KM = 5000;
+  let mode = 'b2b';
+  let providerTier = 'estandar';
+  const TIER_MULT = { economico: 0.85, estandar: 1.0, premium: 1.20 };
+  const TIER_LABELS = { economico: 'Económico', estandar: 'Estándar', premium: 'Premium' };
+  // Tarifas base "Estándar" (las que ya estaban como default). Se editan vía sliders.
+  let baseMovida = 60000;
+  let baseKm = 3625;
+
+  // Zonas: distribución del servicio promedio por geografía
+  const ZONAS_DEFAULT = [
+    { nombre: 'Urbano CABA',     km: 15,  peso: 60 },
+    { nombre: 'AMBA',            km: 45,  peso: 30 },
+    { nombre: 'Larga distancia', km: 150, peso: 10 }
+  ];
+  let zonas = JSON.parse(JSON.stringify(ZONAS_DEFAULT));
+
+  function renderZonas() {
+    const cont = $('zones-builder');
+    if (!cont) return;
+    cont.innerHTML = zonas.map((z, i) => `
+      <div class="zone-row">
+        <input type="text" value="${z.nombre}" data-zi="${i}" data-zk="nombre">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <input type="number" value="${z.km}" min="1" max="500" step="5" data-zi="${i}" data-zk="km">
+          <span class="zone-row-suffix">km</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <input type="number" value="${z.peso}" min="0" max="100" step="5" data-zi="${i}" data-zk="peso">
+          <span class="zone-row-suffix">%</span>
+        </div>
+      </div>
+    `).join('');
+
+    cont.querySelectorAll('input').forEach(el => {
+      el.addEventListener('input', e => {
+        const i = +e.target.dataset.zi;
+        const k = e.target.dataset.zk;
+        const v = e.target.type === 'number' ? +e.target.value : e.target.value;
+        zonas[i][k] = v;
+        updateDistanciaPonderada();
+        calc();
+      });
+    });
+
+    updateDistanciaPonderada();
+  }
+
+  function updateDistanciaPonderada() {
+    const sumaPesos = zonas.reduce((s, z) => s + z.peso, 0);
+    if (sumaPesos === 0) {
+      $('dist').value = 0;
+      $('dist-out').textContent = '0 km · sin pesos';
+      $('dist-out').style.color = 'var(--amber)';
+      return;
+    }
+    const promedio = zonas.reduce((s, z) => s + z.km * z.peso, 0) / sumaPesos;
+    $('dist').value = Math.round(promedio);
+    let texto = Math.round(promedio) + ' km';
+    if (sumaPesos !== 100) {
+      texto += ` · pesos suman ${sumaPesos}%`;
+      $('dist-out').style.color = 'var(--amber)';
+    } else {
+      $('dist-out').style.color = 'var(--text)';
+    }
+    $('dist-out').textContent = texto;
+  }
+
+  // Date helpers
+  const now = new Date();
+  const fechaCorta = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const fechaLarga = now.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  $('dateNow').textContent = fechaCorta;
+  $('p-fecha').textContent = fechaLarga;
+  $('p-fecha-2').textContent = fechaLarga;
+
+  // Cotizador calc
+  let pricingMode = 'markup'; // 'markup' o 'target'
+
+  // Renderiza la comparación de las 3 tarifas paralelas (Económico/Estándar/Premium)
+  function renderTierComparison() {
+    const movida = +$('movida').value;
+    const km = +$('km').value;
+    // Inferir base desde el tier activo
+    const mult = TIER_MULT[providerTier];
+    baseMovida = movida / mult;
+    baseKm = km / mult;
+
+    const cont = $('tier-comparison');
+    if (!cont) return;
+    cont.innerHTML = ['economico', 'estandar', 'premium'].map(t => {
+      const m = baseMovida * TIER_MULT[t];
+      const k = baseKm * TIER_MULT[t];
+      return `
+        <div class="tier-cell ${t === providerTier ? 'active' : ''}">
+          <div class="tier-cell-label">${TIER_LABELS[t]}</div>
+          <div class="tier-cell-value">${fmt(m)}</div>
+          <div class="tier-cell-value" style="color: var(--muted); margin-top: 2px;">${fmt(k)}/km</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function setProviderTier(tier) {
+    if (!TIER_MULT[tier]) return;
+    const oldMult = TIER_MULT[providerTier];
+    const newMult = TIER_MULT[tier];
+    // Reposicionar sliders al valor correspondiente del nuevo tier
+    const currMovida = +$('movida').value;
+    const currKm = +$('km').value;
+    const newMovida = Math.round((currMovida / oldMult) * newMult);
+    const newKm = Math.round((currKm / oldMult) * newMult);
+    $('movida').value = Math.max(+$('movida').min, Math.min(+$('movida').max, newMovida));
+    $('km').value = Math.max(+$('km').min, Math.min(+$('km').max, newKm));
+
+    providerTier = tier;
+    document.querySelectorAll('.tier-btn').forEach(b => b.classList.toggle('active', b.dataset.tier === tier));
+    calc();
+  }
+
+  function calc() {
+    const movida = +$('movida').value;
+    const km = +$('km').value;
+    const kmInc = +$('kmInc').value;
+    const dist = +$('dist').value;
+    const markup = +$('markup').value;
+
+    $('movida-out').textContent = fmt(movida);
+    $('km-out').textContent = fmt(km);
+    $('kmInc-out').textContent = kmInc + ' km';
+    $('dist-out').textContent = dist + ' km';
+    $('markup-out').textContent = markup + '%';
+
+    const extraKm = Math.max(0, dist - kmInc);
+    const costUnit = movida + extraKm * km;
+    const spotUnit = SPOT_MOVIDA + extraKm * SPOT_KM;
+
+    // Refrescar la tabla comparativa de tiers
+    renderTierComparison();
+
+    let servMonth;
+    let priceUnit, marginUnit;
+
+    if (mode === 'b2b') {
+      // El input numérico es la fuente de verdad: permite valores fuera del rango del slider
+      const flotaNum = +$('flota-num').value;
+      const flotaSlider = +$('flota').value;
+      // Si están sincronizados o el numérico es válido, usar el numérico
+      const flota = (!isNaN(flotaNum) && flotaNum >= 1) ? flotaNum : flotaSlider;
+      const freq = +$('freq').value;
+      $('flota-out').textContent = flota.toLocaleString('es-AR');
+      // Sincronizar input numérico solo si no está siendo editado en este momento
+      if (document.activeElement !== $('flota-num')) {
+        $('flota-num').value = flota;
+      }
+      $('freq-out').textContent = freq.toFixed(1) + '%';
+      servMonth = Math.round(flota * freq / 100);
+      $('freq-hint').textContent = freq.toFixed(1) + '% sobre ' + flota.toLocaleString('es-AR') + ' vehículos = ' + servMonth.toLocaleString('es-AR') + ' servicios/mes';
+
+      let perVehicle, revMonth;
+
+      if (pricingMode === 'target') {
+        // Modo: el usuario fija precio/vehículo/mes, todo se deriva de ahí
+        perVehicle = +$('targetPrice').value;
+        $('targetPrice-out').textContent = fmt(perVehicle);
+        revMonth = perVehicle * flota;
+        priceUnit = servMonth > 0 ? revMonth / servMonth : 0;
+        marginUnit = priceUnit - costUnit;
+        const impliedMarkup = costUnit > 0 ? ((priceUnit - costUnit) / costUnit) * 100 : 0;
+        $('pricing-hint').textContent = 'A $' + Math.round(perVehicle).toLocaleString('es-AR') + '/vehículo sobre ' + flota + ' expuestos: facturás ' + fmt(revMonth) + '/mes. Markup implícito sobre costo prestador: ' + Math.round(impliedMarkup) + '%.';
+      } else {
+        // Modo markup: el precio se deriva del costo + markup configurado
+        priceUnit = costUnit * (1 + markup / 100);
+        marginUnit = priceUnit - costUnit;
+        revMonth = priceUnit * servMonth;
+        perVehicle = flota > 0 ? revMonth / flota : 0;
+        $('pricing-hint').textContent = 'Modo markup: el precio por vehículo se deriva del markup ' + markup + '% configurado arriba.';
+      }
+
+      $('per-vehicle').textContent = fmt(perVehicle);
+      $('cost-unit').textContent = fmt(costUnit);
+      $('price-unit').textContent = fmt(priceUnit);
+      $('margin-unit').textContent = fmt(marginUnit);
+
+      const savings = spotUnit > 0 ? ((priceUnit - spotUnit) / spotUnit) * 100 : 0;
+      const savingsRounded = Math.round(savings);
+      $('spot-savings').textContent = (savingsRounded > 0 ? '+' : '') + savingsRounded + '%';
+      const savingsKpi = $('spot-savings').parentElement;
+      savingsKpi.classList.remove('accent', 'danger');
+      if (savings <= 0) savingsKpi.classList.add('accent');
+      else savingsKpi.classList.add('danger');
+
+      $('serv-month').textContent = servMonth.toLocaleString('es-AR');
+      $('cost-month').textContent = fmt(costUnit * servMonth);
+      $('rev-month').textContent = fmt(revMonth);
+      $('margin-month').textContent = fmt(revMonth - costUnit * servMonth);
+
+      // Pintar margen unitario rojo si es negativo (modo target con precio bajo)
+      const marginEl = $('margin-unit').parentElement;
+      marginEl.classList.remove('accent', 'danger');
+      if (marginUnit >= 0) marginEl.classList.add('accent');
+      else marginEl.classList.add('danger');
+
+      const marginMonthEl = $('margin-month').parentElement;
+      marginMonthEl.classList.remove('accent', 'danger');
+      if ((revMonth - costUnit * servMonth) >= 0) marginMonthEl.classList.add('accent');
+      else marginMonthEl.classList.add('danger');
+
+    } else {
+      // B2C: lógica original sin cambios
+      priceUnit = costUnit * (1 + markup / 100);
+      marginUnit = priceUnit - costUnit;
+      servMonth = +$('servB2c').value;
+      $('servB2c-out').textContent = servMonth.toLocaleString('es-AR');
+
+      $('cost-unit').textContent = fmt(costUnit);
+      $('price-unit').textContent = fmt(priceUnit);
+      $('margin-unit').textContent = fmt(marginUnit);
+
+      const savings = ((priceUnit - spotUnit) / spotUnit) * 100;
+      const savingsRounded = Math.round(savings);
+      $('spot-savings').textContent = (savingsRounded > 0 ? '+' : '') + savingsRounded + '%';
+      const savingsKpi = $('spot-savings').parentElement;
+      savingsKpi.classList.remove('accent', 'danger');
+      if (savings <= 0) savingsKpi.classList.add('accent');
+      else savingsKpi.classList.add('danger');
+
+      $('serv-month').textContent = servMonth.toLocaleString('es-AR');
+      $('cost-month').textContent = fmt(costUnit * servMonth);
+      $('rev-month').textContent = fmt(priceUnit * servMonth);
+      $('margin-month').textContent = fmt(marginUnit * servMonth);
+
+      // Reset clases en B2C
+      $('margin-unit').parentElement.classList.remove('danger');
+      $('margin-unit').parentElement.classList.add('accent');
+      $('margin-month').parentElement.classList.remove('danger');
+      $('margin-month').parentElement.classList.add('accent');
+    }
+
+    // Sincronizar con propuesta
+    syncProposal();
+  }
+
+  function setPricingMode(m) {
+    pricingMode = m;
+    document.querySelectorAll('.pricing-mode-btn').forEach(b => {
+      const active = b.dataset.pmode === m;
+      b.classList.toggle('active', active);
+      b.style.background = active ? 'var(--navy-3)' : 'transparent';
+      b.style.color = active ? 'white' : 'var(--muted)';
+    });
+    $('ctrl-target').style.display = m === 'target' ? 'flex' : 'none';
+    // En modo target, el slider de markup queda informativo pero no se usa
+    calc();
+  }
+
+  function setMode(m) {
+    mode = m;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    const b2b = m === 'b2b';
+    $('b2b-input').style.display = b2b ? 'flex' : 'none';
+    $('b2c-input').style.display = b2b ? 'none' : 'flex';
+    $('b2b-freq').style.display = b2b ? 'block' : 'none';
+    $('b2b-pricing').style.display = b2b ? 'block' : 'none';
+    $('b2b-extra').style.display = b2b ? 'flex' : 'none';
+    calc();
+  }
+
+  // Tabs
+  function setView(v) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+    document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.id === 'view-' + v));
+    window.scrollTo(0, 0);
+    // Si entramos a break-even, refrescar cálculo (depende de los planes)
+    if (v === 'breakeven') calcBreakeven();
+  }
+
+  // Sync cotizador → propuesta
+  function syncProposal() {
+    const movida = +$('movida').value;
+    const km = +$('km').value;
+    const kmInc = +$('kmInc').value;
+    const dist = +$('dist').value;
+
+    const extraKm = Math.max(0, dist - kmInc);
+    const costUnit = movida + extraKm * km;
+    const volumen = +$('f-volumen').value || 0;
+    const facturacion = costUnit * volumen;
+
+    $('p-movida').textContent = fmt(movida);
+    $('p-km').textContent = fmt(km);
+    $('p-kminc').textContent = kmInc;
+    $('p-dist').textContent = dist;
+    $('p-prom').textContent = fmt(costUnit);
+    $('p-facturacion').textContent = fmt(facturacion);
+    $('p-volumen').textContent = volumen;
+
+    $('p-prestador').textContent = $('f-prestador').value || '—';
+    $('p-prestador-2').textContent = $('f-prestador').value || '—';
+    $('p-zona').textContent = $('f-zona').value;
+    $('p-zona-2').textContent = $('f-zona').value;
+    $('p-pago').textContent = $('f-pago').value;
+    $('p-sla').textContent = $('f-sla').value;
+    $('p-vigencia').textContent = $('f-vigencia').value || '—';
+
+    // Sincronizar campos de SLA y penalidades
+    if ($('p-sla-2')) $('p-sla-2').textContent = $('f-sla').value;
+    if ($('p-multa-leve')) $('p-multa-leve').textContent = $('f-multa-leve').value || '—';
+    if ($('p-multa-grave')) $('p-multa-grave').textContent = $('f-multa-grave').value || '—';
+    if ($('p-multa-repetida')) $('p-multa-repetida').textContent = $('f-multa-repetida').value || '—';
+
+    const notas = $('f-notas').value.trim();
+    if (notas) {
+      $('p-notas-section').style.display = 'block';
+      $('p-notas').textContent = notas;
+    } else {
+      $('p-notas-section').style.display = 'none';
+    }
+  }
+
+  // Reset
+  window.resetDefaults = function() {
+    $('movida').value = 60000;
+    $('km').value = 3625;
+    $('kmInc').value = 10;
+    $('dist').value = 20;
+    $('markup').value = 40;
+    $('flota').value = 400;
+    $('flota-num').value = 400;
+    $('servB2c').value = 100;
+    $('freq').value = 2;
+    $('targetPrice').value = 3000;
+    setPricingMode('markup');
+    calc();
+  };
+
+  // Copy proposal
+  window.copyProposal = function() {
+    const el = $('proposal');
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    try {
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copiado';
+      setTimeout(() => btn.textContent = orig, 1500);
+    } catch (e) {
+      alert('No se pudo copiar. Seleccioná el texto manualmente.');
+    }
+  };
+
+  // Bindings
+  document.querySelectorAll('input[type=range]').forEach(el => el.addEventListener('input', calc));
+  document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  document.querySelectorAll('.pricing-mode-btn').forEach(b => b.addEventListener('click', () => setPricingMode(b.dataset.pmode)));
+  document.querySelectorAll('.tier-btn').forEach(b => b.addEventListener('click', () => setProviderTier(b.dataset.tier)));
+  $('run-montecarlo').addEventListener('click', runMontecarlo);
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
+  document.querySelectorAll('#view-propuesta input, #view-propuesta select, #view-propuesta textarea').forEach(el => {
+    el.addEventListener('input', syncProposal);
+    el.addEventListener('change', syncProposal);
+  });
+
+  // Input numérico de flota: sincroniza al slider y dispara cálculo
+  $('flota-num').addEventListener('input', e => {
+    const v = +e.target.value;
+    if (isNaN(v) || v < 1) return;
+    // Sincronizar slider (cappea visualmente al max del slider, no afecta cálculo)
+    $('flota').value = Math.min(Math.max(v, +$('flota').min), +$('flota').max);
+    calc();
+  });
+
+  $('goto-propuesta').addEventListener('click', () => setView('propuesta'));
+
+  // ================== MONTECARLO ==================
+
+  function runMontecarlo() {
+    if (mode !== 'b2b') {
+      alert('La simulación Montecarlo está disponible solo en modo B2B (cuentas de flota).');
+      return;
+    }
+
+    const N = 10000;
+    const movida = +$('movida').value;
+    const km = +$('km').value;
+    const kmInc = +$('kmInc').value;
+    const distBase = +$('dist').value;
+    const markup = +$('markup').value;
+    const flota = +$('flota-num').value || +$('flota').value;
+    const freqBase = +$('freq').value;
+
+    const margenes = [];
+    let neg = 0;
+
+    // Variación: ±30% sobre frecuencia y distancia (distribución triangular aprox.)
+    function triangular(min, mid, max) {
+      const u = Math.random();
+      const c = (mid - min) / (max - min);
+      if (u < c) return min + Math.sqrt(u * (max - min) * (mid - min));
+      return max - Math.sqrt((1 - u) * (max - min) * (max - mid));
+    }
+
+    for (let i = 0; i < N; i++) {
+      const f = triangular(freqBase * 0.7, freqBase, freqBase * 1.3);
+      const d = triangular(distBase * 0.7, distBase, distBase * 1.3);
+      const extraKm = Math.max(0, d - kmInc);
+      const costUnit = movida + extraKm * km;
+      const servMonth = flota * f / 100;
+
+      let priceUnit, revMonth;
+      if (pricingMode === 'target') {
+        const perVehicle = +$('targetPrice').value;
+        revMonth = perVehicle * flota;
+        priceUnit = servMonth > 0 ? revMonth / servMonth : 0;
+      } else {
+        priceUnit = costUnit * (1 + markup / 100);
+        revMonth = priceUnit * servMonth;
+      }
+      const margen = revMonth - costUnit * servMonth;
+      margenes.push(margen);
+      if (margen < 0) neg++;
+    }
+
+    margenes.sort((a, b) => a - b);
+    const p = (q) => margenes[Math.floor(N * q)];
+    const p10 = p(0.10);
+    const p50 = p(0.50);
+    const p90 = p(0.90);
+
+    $('mc-p10').textContent = fmt(p10);
+    $('mc-p10').style.color = p10 >= 0 ? 'var(--green)' : 'var(--red)';
+    $('mc-p50').textContent = fmt(p50);
+    $('mc-p50').style.color = p50 >= 0 ? 'var(--green)' : 'var(--red)';
+    $('mc-p90').textContent = fmt(p90);
+    $('mc-p90').style.color = p90 >= 0 ? 'var(--green)' : 'var(--red)';
+    $('mc-neg').textContent = (neg / N * 100).toFixed(1) + '%';
+    $('mc-neg').style.color = neg / N > 0.1 ? 'var(--red)' : (neg / N > 0.02 ? 'var(--amber)' : 'var(--green)');
+
+    drawHistograma(margenes, p50);
+    generateMontecarloBrief({
+      p10, p50, p90,
+      negPct: neg / N,
+      min: margenes[0],
+      max: margenes[N - 1],
+      mean: margenes.reduce((s, v) => s + v, 0) / N,
+      flota,
+      freqBase,
+      pricingMode
+    });
+    $('montecarlo-results').style.display = 'block';
+  }
+
+  function generateMontecarloBrief(s) {
+    const { p10, p50, p90, negPct, min, max, mean, flota, freqBase } = s;
+    const dispersion = p50 !== 0 ? Math.abs((p90 - p10) / p50) : Infinity;
+    const downside = p50 !== 0 ? Math.abs((p50 - p10) / p50) * 100 : 0;
+    const upside = p50 !== 0 ? Math.abs((p90 - p50) / p50) * 100 : 0;
+
+    const brief = $('mc-brief');
+    brief.classList.remove('healthy', 'warn', 'danger');
+
+    let estado, icon, subtitle, diag, variab, risk, action;
+
+    // === Diagnóstico principal ===
+    if (p50 < 0) {
+      // Caso crítico: la mediana es negativa
+      estado = 'danger';
+      icon = '✕';
+      subtitle = 'El escenario actual no es viable económicamente';
+      diag = `La mediana (${fmt(p50)}) es <strong style="color: var(--red);">negativa</strong>. Esto significa que en la mitad de los escenarios simulados perdés plata, incluso con tus parámetros base sin variación. El pricing actual no cubre los costos esperados.`;
+    } else if (negPct > 0.20) {
+      // Frágil: muchos escenarios negativos
+      estado = 'danger';
+      icon = '⚠';
+      subtitle = 'Escenario altamente sensible a variaciones';
+      diag = `La mediana es positiva (${fmt(p50)}), pero <strong style="color: var(--red);">${(negPct*100).toFixed(1)}% de los escenarios dan margen negativo</strong>. Una variación pequeña de la frecuencia o distancia te puede hacer perder plata. Es un equilibrio frágil.`;
+    } else if (negPct > 0.05) {
+      // Aceptable pero con cola de riesgo
+      estado = 'warn';
+      icon = '◐';
+      subtitle = 'Escenario rentable con cola de riesgo';
+      diag = `La mediana es ${fmt(p50)} y el ${(negPct*100).toFixed(1)}% de los escenarios cae en territorio negativo. El negocio cierra en condiciones normales, pero hay riesgo concreto si frecuencia o distancia varían más de lo esperado.`;
+    } else if (dispersion > 0.6) {
+      // Volátil pero rentable
+      estado = 'warn';
+      icon = '◐';
+      subtitle = 'Margen rentable pero con alta volatilidad';
+      diag = `La mediana es ${fmt(p50)} y prácticamente ningún escenario es negativo. Pero la dispersión entre P10 y P90 es alta (${(dispersion*100).toFixed(0)}% de la mediana), por lo que el resultado mensual puede oscilar bastante.`;
+    } else {
+      // Saludable
+      estado = 'healthy';
+      icon = '✓';
+      subtitle = 'Escenario robusto y económicamente viable';
+      diag = `La mediana es ${fmt(p50)} y el ${(100-negPct*100).toFixed(1)}% de los escenarios da margen positivo. La operación es robusta: aún con variaciones realistas en frecuencia y distancia, el negocio cierra de manera consistente.`;
+    }
+
+    brief.classList.add(estado);
+    $('mc-brief-icon').textContent = icon;
+    $('mc-brief-subtitle').textContent = subtitle;
+    $('mc-brief-diag').innerHTML = diag;
+
+    // === Variabilidad ===
+    if (p50 > 0) {
+      variab = `El 80% de los escenarios cae entre ${fmt(p10)} y ${fmt(p90)}. <br>Hacia el lado pesimista: hasta ${downside.toFixed(0)}% por debajo de la mediana. Hacia el optimista: hasta ${upside.toFixed(0)}% por encima.`;
+    } else {
+      variab = `El rango de resultados va de ${fmt(min)} (peor caso) a ${fmt(max)} (mejor caso). La media simulada es ${fmt(mean)}.`;
+    }
+    $('mc-brief-var').innerHTML = variab;
+
+    // === Riesgo concreto ===
+    if (p50 < 0) {
+      risk = `En el peor 10% de escenarios la pérdida llega a ${fmt(p10)} mensuales. Multiplicado por 12 meses son <strong>${fmt(p10 * 12)}</strong> de pérdida anual proyectada en el escenario pesimista.`;
+    } else if (negPct > 0.05) {
+      const peorMes = p10 < 0 ? p10 : min;
+      risk = `En aproximadamente 1 de cada ${Math.round(1/negPct)} meses simulados, la operación arroja pérdida. El peor escenario contemplado es de <strong>${fmt(peorMes)}</strong>. Si tenés varios meses malos seguidos, el caja se compromete rápido.`;
+    } else if (p10 > 0) {
+      risk = `Incluso en el peor 10% de los escenarios el margen sigue siendo positivo (${fmt(p10)}). El piso es seguro, no hay riesgo realista de cerrar el mes en rojo bajo estos parámetros.`;
+    } else {
+      risk = `El P10 (${fmt(p10)}) está cerca del break-even pero por encima. La operación tiene margen de seguridad ajustado.`;
+    }
+    $('mc-brief-risk').innerHTML = risk;
+
+    // === Recomendación accionable ===
+    if (p50 < 0) {
+      action = `<strong>El pricing actual no funciona.</strong> Tenés tres opciones: (1) subir el markup en al menos ${Math.ceil(Math.abs(p50/p90)*100)}% para que la mediana cruce a positivo, (2) renegociar con prestadores tarifas más bajas (probá el tier "Económico"), o (3) reducir los servicios incluidos en los planes para que el costo esperado caiga. Sin alguno de estos cambios, el negocio pierde plata mes a mes.`;
+    } else if (negPct > 0.20) {
+      action = `<strong>Aumentá el colchón.</strong> Subí el precio por servicio entre 10% y 15% para mover el P10 a territorio positivo. Alternativamente, asegurate de que en la negociación con el cliente te garanticen un piso de volumen mensual: con frecuencias bajas estables el margen mejora notablemente.`;
+    } else if (negPct > 0.05) {
+      action = `<strong>El pricing cierra pero exigí compromiso de volumen al cliente.</strong> Pedí una <em>garantía mínima mensual de servicios</em> en el contrato. Con eso eliminás el riesgo del lado de la frecuencia y la cola negativa desaparece. También conviene tener identificado un plan B con prestadores más económicos para los meses con mayor demanda.`;
+    } else if (dispersion > 0.6) {
+      action = `<strong>Pricing rentable pero gestioná la caja.</strong> El margen oscila bastante mes a mes, así que mantené reserva equivalente a 2-3 meses del P10 para cubrir variabilidad. Considerá ajustar mensualmente el monto facturado al cliente según volumen real (modelo "verdadero variable") para reducir tu propia exposición.`;
+    } else {
+      action = `<strong>Escalá con confianza.</strong> Este escenario soporta crecimiento porque incluso en el P10 hay margen positivo. Es un buen momento para invertir en captación de nuevos clientes con esta misma estructura de pricing. Considerá replicar este modelo a otras zonas o cuentas similares.`;
+    }
+    $('mc-brief-action').innerHTML = action;
+  }
+
+  function drawHistograma(data, p50) {
+    const canvas = $('mc-histogram');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.clientWidth;
+    const H = canvas.clientHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    const bins = 50;
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const binSize = (max - min) / bins;
+    const counts = new Array(bins).fill(0);
+    data.forEach(v => {
+      const idx = Math.min(bins - 1, Math.floor((v - min) / binSize));
+      counts[idx]++;
+    });
+
+    const maxCount = Math.max(...counts);
+    const barWidth = W / bins;
+    const padBottom = 28;
+
+    // Línea base de cero (donde margen = 0)
+    const zeroX = ((0 - min) / (max - min)) * W;
+
+    // Barras
+    counts.forEach((c, i) => {
+      const x = i * barWidth;
+      const binStart = min + i * binSize;
+      const binEnd = binStart + binSize;
+      const isNeg = binEnd <= 0;
+      const isCross = binStart < 0 && binEnd > 0;
+      const h = (c / maxCount) * (H - padBottom);
+      ctx.fillStyle = isNeg ? '#F87171' : (isCross ? 'rgba(248,113,113,0.5)' : '#4ADE80');
+      ctx.fillRect(x + 0.5, H - padBottom - h, barWidth - 1, h);
+    });
+
+    // Línea de cero
+    if (zeroX >= 0 && zeroX <= W) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(zeroX, 0);
+      ctx.lineTo(zeroX, H - padBottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('break-even', zeroX + 4, 14);
+    }
+
+    // Línea de P50
+    const p50X = ((p50 - min) / (max - min)) * W;
+    if (p50X >= 0 && p50X <= W) {
+      ctx.strokeStyle = '#3561D4';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(p50X, 0);
+      ctx.lineTo(p50X, H - padBottom);
+      ctx.stroke();
+      ctx.fillStyle = '#3561D4';
+      ctx.font = 'bold 10px JetBrains Mono';
+      ctx.fillText('P50', p50X + 4, 26);
+    }
+
+    // Etiquetas de min/max
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '10px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText(fmt(min), 4, H - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText(fmt(max), W - 4, H - 8);
+    ctx.textAlign = 'left';
+  }
+
+  // ================== BREAK-EVEN ==================
+
+  function calcBreakeven() {
+    // Costos fijos
+    const costos = ['be-sueldos', 'be-soporte', 'be-infra', 'be-tools', 'be-marketing', 'be-otros'];
+    const totalFijo = costos.reduce((s, id) => {
+      const el = $(id);
+      return s + (el ? +el.value || 0 : 0);
+    }, 0);
+    $('be-total').textContent = fmt(totalFijo);
+
+    // Calcular margen unitario blended desde la pestaña planes
+    const tam = +$('pl-tam').value || 1;
+    const freqGlobal = +$('pl-uso').value / 100;
+
+    let totalFacturacion = 0;
+    let totalCosto = 0;
+
+    planes.forEach(p => {
+      const costoServ = costoServicioPlan(p);
+      const freq = p.freqCustom !== null ? p.freqCustom / 100 : freqGlobal;
+      const promedioAnualMensualizado = p.serviciosAnio / 12;
+      const serviciosUsados = Math.min(freq, p.limiteMes, promedioAnualMensualizado);
+      const usuariosTier = tam * (p.share / 100);
+      totalFacturacion += p.precio * usuariosTier;
+      totalCosto += costoServ * serviciosUsados * usuariosTier;
+    });
+
+    const arpu = tam > 0 ? totalFacturacion / tam : 0;
+    const margenUnit = tam > 0 ? (totalFacturacion - totalCosto) / tam : 0;
+    const margenPct = arpu > 0 ? (margenUnit / arpu) * 100 : 0;
+
+    $('be-arpu').textContent = fmt(arpu);
+    $('be-margen-unit').textContent = fmt(margenUnit);
+    $('be-margen-pct').textContent = Math.round(margenPct) + '% del ARPU';
+    $('be-margen-pct-only').textContent = Math.round(margenPct) + '%';
+
+    $('be-margen-unit').style.color = margenUnit >= 0 ? 'var(--green)' : 'var(--red)';
+    $('be-margen-pct-only').style.color = margenPct >= 25 ? 'var(--green)' : (margenPct >= 0 ? 'var(--amber)' : 'var(--red)');
+
+    // Break-even
+    if (margenUnit <= 0) {
+      $('be-clientes').textContent = '∞';
+      $('be-clientes').style.color = 'var(--red)';
+      $('be-facturacion').textContent = '—';
+      $('be-cuentas-b2b').textContent = '—';
+      $('be-cuentas-b2b-sub').textContent = 'No hay margen unitario positivo';
+      $('be-runway-fill').style.width = '0%';
+      $('be-runway-pct').textContent = '0%';
+      renderEscenariosBreakeven(0, 0, totalFijo);
+      return;
+    }
+
+    const clientesNecesarios = Math.ceil(totalFijo / margenUnit);
+    const facturacionEquilibrio = clientesNecesarios * arpu;
+
+    $('be-clientes').textContent = clientesNecesarios.toLocaleString('es-AR');
+    $('be-clientes').style.color = 'white';
+    $('be-facturacion').textContent = fmt(facturacionEquilibrio);
+
+    // Cuentas B2B equivalentes (asumiendo cuenta promedio = tam actual)
+    const cuentasB2B = Math.ceil(clientesNecesarios / tam);
+    $('be-cuentas-b2b').textContent = cuentasB2B.toLocaleString('es-AR');
+    $('be-cuentas-b2b-sub').textContent = `flotas de ${tam.toLocaleString('es-AR')} vehículos promedio`;
+
+    // Runway
+    const actuales = +$('be-actuales').value || 0;
+    const pctRunway = Math.min(100, (actuales / clientesNecesarios) * 100);
+    $('be-runway-fill').style.width = pctRunway + '%';
+    $('be-runway-pct').textContent = pctRunway.toFixed(1) + '%';
+
+    // Escenarios
+    renderEscenariosBreakeven(clientesNecesarios, margenUnit, totalFijo);
+  }
+
+  function renderEscenariosBreakeven(necesarios, margenUnit, totalFijo) {
+    const grid = $('be-scenarios-grid');
+    if (!grid) return;
+    const escenarios = [
+      { label: '50% de break-even', factor: 0.5 },
+      { label: 'Break-even', factor: 1.0 },
+      { label: '150% de break-even', factor: 1.5 },
+      { label: '2x break-even', factor: 2.0 }
+    ];
+    grid.innerHTML = escenarios.map(e => {
+      const clientes = Math.ceil(necesarios * e.factor);
+      const margenMensual = margenUnit > 0 ? clientes * margenUnit - totalFijo : -totalFijo;
+      const cls = margenMensual >= 0 ? 'pos' : 'neg';
+      const sign = margenMensual >= 0 ? '+' : '';
+      return `
+        <div class="be-scenario">
+          <div class="be-scenario-label">${e.label}</div>
+          <div class="be-scenario-value ${cls}">${sign}${fmt(margenMensual)}</div>
+          <div class="be-scenario-sub">${clientes.toLocaleString('es-AR')} clientes</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Bind inputs de break-even
+  function bindBreakevenInputs() {
+    ['be-sueldos', 'be-soporte', 'be-infra', 'be-tools', 'be-marketing', 'be-otros', 'be-actuales'].forEach(id => {
+      const el = $(id);
+      if (el) el.addEventListener('input', calcBreakeven);
+    });
+  }
+
+  // ================== PLANES CLIENTE FINAL ==================
+
+  const KM_ILIMITADO_ASSUMPTION = 800; // Km asumidos cuando un plan tiene km ilimitados (para cálculo de costo)
+
+  const PLANES_DEFAULT = [
+    { tier: 'Básico',  serviciosAnio: 4,  limiteMes: 1, kmInc: 20,  kmIlimitado: false, precio: 4500,  share: 60, freqCustom: null, featured: false },
+    { tier: 'Plus',    serviciosAnio: 8,  limiteMes: 2, kmInc: 30,  kmIlimitado: false, precio: 7800,  share: 30, freqCustom: null, featured: true  },
+    { tier: 'Premium', serviciosAnio: 12, limiteMes: 2, kmInc: 50,  kmIlimitado: true,  precio: 13500, share: 10, freqCustom: null, featured: false }
+  ];
+  let planes = JSON.parse(JSON.stringify(PLANES_DEFAULT));
+
+  function costoPrestadorActual() {
+    const movida = +$('movida').value;
+    const km = +$('km').value;
+    const kmInc = +$('kmInc').value;
+    return { movida, km, kmInc };
+  }
+
+  function costoServicioPlan(plan) {
+    const { movida, km, kmInc } = costoPrestadorActual();
+    // Si el plan tiene km ilimitados, usamos la assumption global como referencia interna
+    const kmEfectivos = plan.kmIlimitado ? KM_ILIMITADO_ASSUMPTION : plan.kmInc;
+    const extraKm = Math.max(0, kmEfectivos - kmInc);
+    return movida + extraKm * km;
+  }
+
+  function renderPlanes() {
+    const grid = $('planes-grid');
+    const tipo = $('pl-tipo').value;
+    const unidad = tipo === 'b2b' ? 'vehículo' : 'usuario';
+
+    // Actualizar costo prestador en metaCard
+    const c = costoPrestadorActual();
+    $('pl-costo').value = '$' + Math.round(c.movida).toLocaleString('es-AR') + ' base · $' + Math.round(c.km).toLocaleString('es-AR') + '/km';
+
+    grid.innerHTML = '';
+    planes.forEach((p, i) => {
+      const costoServ = costoServicioPlan(p);
+      const card = document.createElement('div');
+      card.className = 'plan-card' + (p.featured ? ' featured' : '');
+      card.innerHTML = `
+        <div class="plan-tier">${p.tier}</div>
+        <input class="plan-name-input" type="text" value="${p.tier}" data-i="${i}" data-k="tier">
+        <div class="plan-price-row">
+          <span class="plan-price-currency">$</span>
+          <input class="plan-price-input" type="number" value="${p.precio}" min="0" step="100" data-i="${i}" data-k="precio">
+          <span class="plan-price-unit">/ ${unidad} / mes</span>
+        </div>
+
+        <div class="plan-share">
+          <div class="plan-share-header">
+            <span class="plan-share-label">Share del mix</span>
+            <div class="plan-share-value-wrap">
+              <input type="number" class="plan-share-input" value="${p.share}" min="0" max="100" step="1" data-i="${i}" data-k="share">
+              <span class="plan-share-pct">%</span>
+            </div>
+          </div>
+          <input type="range" class="plan-share-slider" value="${p.share}" min="0" max="100" step="1" data-i="${i}" data-k="share">
+        </div>
+
+        <div class="plan-config">
+          <div class="plan-config-row">
+            <label>Servicios incluidos / año</label>
+            <input type="number" value="${p.serviciosAnio}" min="0" step="1" data-i="${i}" data-k="serviciosAnio">
+          </div>
+          <div class="plan-config-row">
+            <label>Tope de uso por mes</label>
+            <input type="number" value="${p.limiteMes}" min="1" step="1" data-i="${i}" data-k="limiteMes">
+          </div>
+          <div class="plan-config-row">
+            <label>Km por servicio</label>
+            ${p.kmIlimitado
+              ? `<span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(53,97,212,0.2); color: var(--blue-soft); border: 1px solid rgba(53,97,212,0.4); border-radius: 12px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em;">∞ ILIMITADO</span>`
+              : `<input type="number" value="${p.kmInc}" min="0" step="5" data-i="${i}" data-k="kmInc">`
+            }
+          </div>
+          <div class="plan-config-row">
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox" data-i="${i}" data-k="kmIlimitado" ${p.kmIlimitado ? 'checked' : ''} style="width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; margin: 0;">
+              <span>Km ilimitados</span>
+            </label>
+            <span style="font-size: 11px; color: var(--muted); font-style: italic;">${p.kmIlimitado ? `asume ${KM_ILIMITADO_ASSUMPTION}km / cálculo` : ''}</span>
+          </div>
+          <div class="plan-config-row">
+            <label style="display: flex; align-items: center; gap: 6px;">
+              <input type="checkbox" data-i="${i}" data-k="freqCustomEnabled" ${p.freqCustom !== null ? 'checked' : ''} style="width: 14px; height: 14px; accent-color: var(--blue); cursor: pointer; margin: 0;">
+              <span>Frecuencia personalizada</span>
+            </label>
+            ${p.freqCustom !== null
+              ? `<input type="number" value="${p.freqCustom}" min="0.1" max="20" step="0.1" data-i="${i}" data-k="freqCustom" style="width: 70px;">`
+              : `<span style="font-size: 11px; color: var(--muted); font-style: italic;">usa global</span>`
+            }
+          </div>
+          <div class="plan-config-row">
+            <label>Costo estimado / servicio</label>
+            <span style="font-size: 12px; font-weight: 600; color: var(--muted); font-family: 'JetBrains Mono', monospace;">${fmt(costoServ)}</span>
+          </div>
+        </div>
+
+        <div class="plan-stats" id="plan-stats-${i}"></div>
+        <div class="plan-margin-bar"><div class="plan-margin-bar-fill" id="plan-bar-${i}"></div></div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Bind inputs
+    grid.querySelectorAll('input').forEach(el => {
+      const handler = e => {
+        const i = +e.target.dataset.i;
+        const k = e.target.dataset.k;
+        if (!k) return;
+        let v;
+        if (e.target.type === 'checkbox') v = e.target.checked;
+        else if (e.target.type === 'number' || e.target.type === 'range') v = +e.target.value;
+        else v = e.target.value;
+
+        planes[i][k] = v;
+
+        // Si cambió share, sincronizar el slider y el input numérico del mismo plan
+        if (k === 'share') {
+          const otroInput = grid.querySelectorAll(`input[data-i="${i}"][data-k="share"]`);
+          otroInput.forEach(input => {
+            if (input !== e.target && document.activeElement !== input) {
+              input.value = v;
+            }
+          });
+          updatePlanStats();
+        } else if (k === 'kmIlimitado') {
+          // Re-render por cambio de UI (input visible cambia)
+          renderPlanes();
+        } else if (k === 'freqCustomEnabled') {
+          // Activar/desactivar freq custom: cuando se activa, usa la global como default
+          const globalFreq = +$('pl-uso').value;
+          planes[i].freqCustom = v ? globalFreq : null;
+          renderPlanes();
+        } else {
+          updatePlanStats();
+        }
+      };
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    });
+
+    updatePlanStats();
+  }
+
+  function updatePlanStats() {
+    const freqGlobal = +$('pl-uso').value / 100; // Frecuencia mensual global (default)
+    const tipo = $('pl-tipo').value;
+
+    planes.forEach((p, i) => {
+      const costoServ = costoServicioPlan(p);
+      // Frecuencia: la custom del plan si está definida, si no la global
+      const freq = p.freqCustom !== null ? p.freqCustom / 100 : freqGlobal;
+      // Servicios esperados/usuario/mes = mínimo entre:
+      // (a) la frecuencia estadística mensual,
+      // (b) el tope mensual permitido por el plan,
+      // (c) el promedio mensual derivado del cupo anual (anio/12).
+      const promedioAnualMensualizado = p.serviciosAnio / 12;
+      const serviciosUsados = Math.min(freq, p.limiteMes, promedioAnualMensualizado);
+      const costoMensualEsperado = costoServ * serviciosUsados;
+      const margenUnit = p.precio - costoMensualEsperado;
+      const margenPct = p.precio > 0 ? (margenUnit / p.precio) * 100 : 0;
+
+      const statsEl = $('plan-stats-' + i);
+      const statClass = margenUnit >= 0 ? 'pos' : 'neg';
+      statsEl.innerHTML = `
+        <div class="plan-stat">
+          <div class="plan-stat-label">Costo esperado</div>
+          <div class="plan-stat-value">${fmt(costoMensualEsperado)}</div>
+        </div>
+        <div class="plan-stat">
+          <div class="plan-stat-label">Margen</div>
+          <div class="plan-stat-value ${statClass}">${fmt(margenUnit)}</div>
+        </div>
+      `;
+
+      const bar = $('plan-bar-' + i);
+      const pctClamped = Math.max(0, Math.min(100, margenPct));
+      bar.style.width = pctClamped + '%';
+      bar.classList.remove('warn', 'bad');
+      if (margenPct < 0) bar.classList.add('bad');
+      else if (margenPct < 25) bar.classList.add('warn');
+    });
+
+    renderResumen();
+  }
+
+  function renderResumen() {
+    const grid = $('planes-resumen-grid');
+    const tam = +$('pl-tam').value || 1;
+    const freqGlobal = +$('pl-uso').value / 100;
+
+    let totalFacturacion = 0;
+    let totalCosto = 0;
+
+    grid.innerHTML = '';
+    planes.forEach((p, i) => {
+      const costoServ = costoServicioPlan(p);
+      const freq = p.freqCustom !== null ? p.freqCustom / 100 : freqGlobal;
+      const promedioAnualMensualizado = p.serviciosAnio / 12;
+      const serviciosUsados = Math.min(freq, p.limiteMes, promedioAnualMensualizado);
+      // Usuarios reales asignados a este plan según el share configurado
+      const usuariosTier = tam * (p.share / 100);
+      const costoMensual = costoServ * serviciosUsados * usuariosTier;
+      const facturacion = p.precio * usuariosTier;
+      const margen = facturacion - costoMensual;
+      const margenPct = facturacion > 0 ? Math.round((margen / facturacion) * 100) : 0;
+
+      totalFacturacion += facturacion;
+      totalCosto += costoMensual;
+
+      const card = document.createElement('div');
+      card.className = 'kpi' + (margen >= 0 ? ' accent' : ' danger');
+      card.innerHTML = `
+        <div class="kpi-label">${p.tier}${p.featured ? ' · ★' : ''} · ${p.share}%</div>
+        <div class="kpi-value">${fmt(margen)}</div>
+        <div style="font-size: 11px; color: var(--muted); margin-top: 6px; font-family: 'JetBrains Mono', monospace;">
+          ${Math.round(usuariosTier).toLocaleString('es-AR')} u · ${fmt(facturacion)} · ${margenPct}% mg
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Bloque blended
+    const margenTotal = totalFacturacion - totalCosto;
+    const margenPctBlended = totalFacturacion > 0 ? Math.round((margenTotal / totalFacturacion) * 100) : 0;
+    const arpu = tam > 0 ? totalFacturacion / tam : 0;
+
+    $('blended-arpu').textContent = fmt(arpu);
+    $('blended-rev').textContent = fmt(totalFacturacion);
+    $('blended-cost').textContent = fmt(totalCosto);
+    $('blended-margin').textContent = fmt(margenTotal) + ' (' + margenPctBlended + '%)';
+
+    const marginEl = $('blended-margin');
+    marginEl.classList.remove('pos', 'neg');
+    marginEl.classList.add(margenTotal >= 0 ? 'pos' : 'neg');
+
+    // Descripción del mix
+    const sumaShares = planes.reduce((s, p) => s + p.share, 0);
+    const sumaRedondeada = Math.round(sumaShares * 10) / 10;
+    const mixDesc = planes.map(p => p.share + '% ' + p.tier).join(' · ');
+    const tipo = $('pl-tipo').value;
+    const unidad = tipo === 'b2b' ? 'vehículos' : 'usuarios';
+
+    let sumaTexto;
+    if (sumaRedondeada === 100) {
+      sumaTexto = ` · suma 100% ✓`;
+    } else if (sumaRedondeada < 100) {
+      sumaTexto = ` · suma ${sumaRedondeada}% (${(100 - sumaRedondeada).toFixed(1)}% sin asignar)`;
+    } else {
+      sumaTexto = ` · suma ${sumaRedondeada}% (sobrepasa 100%)`;
+    }
+
+    $('blended-mix-desc').textContent = 'Mix: ' + mixDesc + sumaTexto + ' · sobre ' + tam.toLocaleString('es-AR') + ' ' + unidad + '.';
+    $('blended-mix-desc').style.color = sumaRedondeada === 100 ? 'var(--muted)' : 'var(--amber)';
+  }
+
+  // Reset planes
+  window.resetPlanes = function() {
+    planes = JSON.parse(JSON.stringify(PLANES_DEFAULT));
+    renderPlanes();
+  };
+
+  // Sync planes cuando cambia el cotizador
+  function refreshPlanesIfNeeded() {
+    if (document.querySelector('#view-planes.active') || $('propuesta-cliente-wrap').style.display !== 'none') {
+      // re-render visible
+    }
+    // Siempre actualizar costo prestador en label, sin reconstruir
+    const c = costoPrestadorActual();
+    if ($('pl-costo')) {
+      $('pl-costo').value = '$' + Math.round(c.movida).toLocaleString('es-AR') + ' base · $' + Math.round(c.km).toLocaleString('es-AR') + '/km';
+    }
+    updatePlanStats();
+    if ($('propuesta-cliente-wrap').style.display !== 'none') syncProposalCliente();
+  }
+
+  // Hook al calc original
+  const _originalCalc = calc;
+  // Eventos del cotizador ya disparan calc; agregamos un re-render adicional
+  document.querySelectorAll('#view-cotizador input[type=range]').forEach(el => {
+    el.addEventListener('input', refreshPlanesIfNeeded);
+  });
+
+  // Bindings vista planes
+  $('pl-tipo').addEventListener('change', renderPlanes);
+  $('pl-uso').addEventListener('input', updatePlanStats);
+  $('pl-uso').addEventListener('change', updatePlanStats);
+  $('pl-tam').addEventListener('input', updatePlanStats);
+
+  // ================== PROPUESTA CLIENTE FINAL ==================
+
+  function showPropuestaCliente() {
+    $('propuesta-cliente-wrap').style.display = 'block';
+    syncProposalCliente();
+    setTimeout(() => $('propuesta-cliente-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  }
+
+  window.hidePropuestaCliente = function() {
+    $('propuesta-cliente-wrap').style.display = 'none';
+  };
+
+  $('goto-propuesta-cliente').addEventListener('click', showPropuestaCliente);
+
+  function syncProposalCliente() {
+    const tipo = $('pl-tipo').value;
+    const unidad = tipo === 'b2b' ? 'vehículo' : 'usuario';
+    const recIdx = +$('pc-rec').value;
+    const tam = +$('pl-tam').value || 1;
+
+    $('pc-fecha').textContent = fechaLarga;
+    $('pc-fecha-2').textContent = fechaLarga;
+    $('pc-cliente-out').textContent = $('pc-cliente').value || '—';
+    $('pc-cliente-out-2').textContent = $('pc-cliente').value || '—';
+    $('pc-tam-out').textContent = $('pc-tam-label').value || '—';
+    $('pc-tam-out-2').textContent = tam.toLocaleString('es-AR') + ' ' + unidad + 's';
+    $('pc-vigencia-out').textContent = $('pc-vigencia').value || '—';
+    $('pc-unidad').textContent = unidad;
+
+    const rec = planes[recIdx];
+    $('pc-plan-rec-name').textContent = rec.tier;
+    $('pc-precio-unit').textContent = fmt(rec.precio);
+    $('pc-total').textContent = fmt(rec.precio * tam);
+
+    const notas = $('pc-notas').value.trim();
+    if (notas) {
+      $('pc-notas-section').style.display = 'block';
+      $('pc-notas-out').textContent = notas;
+    } else {
+      $('pc-notas-section').style.display = 'none';
+    }
+
+    // Render 3 planes
+    const grid = $('pc-planes-grid');
+    grid.innerHTML = '';
+    planes.forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'proposal-plan' + (i === recIdx ? ' featured' : '');
+      const features = [
+        `<strong>${p.serviciosAnio}</strong> servicio${p.serviciosAnio !== 1 ? 's' : ''} de auxilio por año`,
+        `Tope de uso: hasta <strong>${p.limiteMes}</strong> servicio${p.limiteMes !== 1 ? 's' : ''} por mes`,
+        p.kmIlimitado
+          ? `<strong>Kilometraje ilimitado</strong> por servicio`
+          : `Hasta <strong>${p.kmInc} km</strong> incluidos por servicio`,
+        `Atención 24/7 vía WhatsApp`,
+        `Tiempo de respuesta < 45 min`,
+        `Servicios adicionales a tarifa preferencial`
+      ];
+      if (i >= 1) features.push(`Reportes operativos mensuales`);
+      if (i >= 2) features.push(`Account manager dedicado`);
+
+      card.innerHTML = `
+        <div class="proposal-plan-tier">Tier ${i + 1}</div>
+        <div class="proposal-plan-name">${p.tier}</div>
+        <div class="proposal-plan-price">${fmt(p.precio)}</div>
+        <div class="proposal-plan-unit">por ${unidad} / mes</div>
+        <ul class="proposal-plan-features">
+          ${features.map(f => '<li>' + f + '</li>').join('')}
+        </ul>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  window.copyProposalCliente = function() {
+    const el = $('proposal-cliente');
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    try {
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copiado';
+      setTimeout(() => btn.textContent = orig, 1500);
+    } catch (e) {
+      alert('No se pudo copiar. Seleccioná manualmente.');
+    }
+  };
+
+  document.querySelectorAll('#propuesta-cliente-wrap input, #propuesta-cliente-wrap select, #propuesta-cliente-wrap textarea').forEach(el => {
+    el.addEventListener('input', syncProposalCliente);
+    el.addEventListener('change', syncProposalCliente);
+  });
+
+  // Init
+  renderZonas();
+  renderPlanes();
+  bindBreakevenInputs();
+
+  calc();
+  syncProposal();
+})();
+</script>
+
+</body>
+</html>
